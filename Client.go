@@ -15,6 +15,10 @@ var (
 	// ErrNotAuthenticated will be returned is the client is not
 	// authenticated. Remember to call Authenticate().
 	ErrNotAuthenticated = errors.New("Client is not authenticated")
+
+	// ErrWrongCredentials will be returned if the username and/or
+	// password is not recognized by Garmin Connect.
+	ErrWrongCredentials = errors.New("Username and/or password not recognized")
 )
 
 // Client can be used to access the unofficial Garmin Connect API.
@@ -117,6 +121,10 @@ func (c *Client) Authenticate(username string, password string) error {
 	// undo escaping
 	ticketURL = strings.Replace(ticketURL, "\\/", "/", -1)
 
+	if ticketURL == "" {
+		return ErrWrongCredentials
+	}
+
 	// Use ticket to request session.
 	req, _ := c.newRequest("GET", ticketURL, nil)
 	resp, err = c.do(req)
@@ -132,8 +140,13 @@ func (c *Client) Authenticate(username string, password string) error {
 		}
 	}
 
-	// The session id will not be valid without a call to /modern/.
-	_, err = c.getString("https://connect.garmin.com/modern/")
+	if c.sessionid == nil {
+		return ErrWrongCredentials
+	}
+
+	// The session id will not be valid until we follow the redirect.
+	location := resp.Header.Get("Location")
+	_, err = c.getString(location)
 	if err != nil {
 		return err
 	}
