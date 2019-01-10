@@ -1,9 +1,18 @@
 package connect
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"time"
 )
+
+//calendarDate: "2019-01-10"
+//samplePk: 1547104108000
+//"physiqueRating": null,
+//"visceralFat": null,
+//"metabolicAge": null,
+//"caloricIntake": null,
 
 // Weightin is a single weight event.
 type Weightin struct {
@@ -15,11 +24,14 @@ type Weightin struct {
 	BodyWater         float64 `json:"bodyWater"`  // kilogram
 	BoneMass          int     `json:"boneMass"`   // gram
 	MuscleMass        int     `json:"muscleMass"` // gram
-	//"physiqueRating": null,
-	//"visceralFat": null,
-	//"metabolicAge": null,
-	//"caloricIntake": null,
-	SourceType string `json:"sourceType"`
+	SourceType        string  `json:"sourceType"`
+}
+
+// WeightAverage is aggregated weight data for a specific period.
+type WeightAverage struct {
+	Weightin
+	From  int `json:"from"`
+	Until int `json:"until"`
 }
 
 // LatestWeight will retrieve the latest weight in by date.
@@ -37,4 +49,85 @@ func (c *Client) LatestWeight(date time.Time) (*Weightin, error) {
 	}
 
 	return wi, nil
+}
+
+// Weightins will retrieve all weight ins between startDate and endDate. A
+// summary is provided as the first returned value. This summary is calculated
+// by Garmin Connect.
+func (c *Client) Weightins(startDate time.Time, endDate time.Time) (*WeightAverage, []Weightin, error) {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/weight-service/weight/dateRange?startDate=%s&endDate=%s",
+		formatDate(startDate),
+		formatDate(endDate))
+
+	var proxy struct {
+		DateWeightList []Weightin     `json:"dateWeightList"`
+		TotalAverage   *WeightAverage `json:"totalAverage"`
+	}
+
+	err := c.getJSON(URL, &proxy)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return proxy.TotalAverage, proxy.DateWeightList, nil
+}
+
+// DeleteWeightin will delete all biometric data for date.
+func (c *Client) DeleteWeightin(date time.Time) error {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/biometric-service/biometric/%s", formatDate(date))
+
+	req, err := c.newRequest("DELETE", URL, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	resp.Body.Close()
+
+	return nil
+}
+
+// AddUserWeight will add a manual weight in. weight is in grams to match
+// Weightin.
+func (c *Client) AddUserWeight(date time.Time, weight float64) error {
+	URL := "https://connect.garmin.com/modern/proxy/weight-service/user-weight"
+	payload := struct {
+		Date    string  `json:"date"`
+		UnitKey string  `json:"unitKey"`
+		Value   float64 `json:"value"`
+	}{
+		Date:    formatDate(date),
+		UnitKey: "kg",
+		Value:   weight / 1000.0,
+	}
+
+	body := bytes.NewBuffer(nil)
+	enc := json.NewEncoder(body)
+	err := enc.Encode(payload)
+	if err != nil {
+		return err
+	}
+
+	req, err := c.newRequest("POST", URL, body)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("nk", "NT") // Yep. This is needed. No idea what it does.
+	req.Header.Add("content-type", "application/json")
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+
+	if resp.StatusCode != 204 {
+		return fmt.Errorf("HTTP call returned %d", resp.StatusCode)
+	}
+
+	return nil
 }
