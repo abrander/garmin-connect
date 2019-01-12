@@ -28,14 +28,14 @@ type AdhocChallenge struct {
 	Description                   string   `json:"adHocChallengeDesc"`
 	OwnerProfileID                int      `json:"ownerUserProfileId"`
 	UUID                          string   `json:"uuid"`
-	Start                         Time     `json:"startDate"` // "2019-01-12T00:00:00.0"
-	End                           Time     `json:"endDate"`   // "2019-01-13T23:59:59.0"
+	Start                         Time     `json:"startDate"`
+	End                           Time     `json:"endDate"`
 	DurationTypeID                int      `json:"durationTypeId"`
 	UserRanking                   int      `json:"userRanking"`
 	Players                       []Player `json:"players"`
 }
 
-// AdhocChallenges will list the current non-completed Ad-Hoc challenges.
+// AdhocChallenges will list the currently non-completed Ad-Hoc challenges.
 // Please note that Players will not be populated, use AdhocChallenge() to
 // retrieve players for a challenge.
 func (c *Client) AdhocChallenges() ([]AdhocChallenge, error) {

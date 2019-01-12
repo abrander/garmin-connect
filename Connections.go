@@ -1,7 +1,7 @@
 package connect
 
 // Connections will list the connections of displayName. If displayName is
-// empty, the current authenticated connection list wil be returned.
+// empty, the current authenticated users connection list wil be returned.
 func (c *Client) Connections(displayName string) ([]SocialProfile, error) {
 	URL := "https://connect.garmin.com/modern/proxy/userprofile-service/socialProfile/connections/" + displayName
 

@@ -7,13 +7,10 @@ type BiometricProfile struct {
 	Weight        float64 `json:"weight"`
 	VO2Max        float64 `json:"vo2Max"`
 	VO2MaxCycling float64 `json:"vo2MaxCycling"`
-	//"lactateThresholdHeartRate": null,
-	//"activityClass": null
 }
 
-// UserInfo is very besic information about a user.
+// UserInfo is very basic information about a user.
 type UserInfo struct {
-	//"birthDate": null,
 	Gender   string `json:"genderType"`
 	Email    string `json:"email"`
 	Locale   string `json:"locale"`
@@ -21,7 +18,7 @@ type UserInfo struct {
 	Age      int    `json:"age"`
 }
 
-// PersonalInformation is user info and biometric profile for a user.
+// PersonalInformation is user info and a biometric profile for a user.
 type PersonalInformation struct {
 	UserInfo         UserInfo         `json:"userInfo"`
 	BiometricProfile BiometricProfile `json:"biometricProfile"`

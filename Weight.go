@@ -7,13 +7,6 @@ import (
 	"time"
 )
 
-//calendarDate: "2019-01-10"
-//samplePk: 1547104108000
-//"physiqueRating": null,
-//"visceralFat": null,
-//"metabolicAge": null,
-//"caloricIntake": null,
-
 // Weightin is a single weight event.
 type Weightin struct {
 	Date              int     `json:"date"`
@@ -34,7 +27,7 @@ type WeightAverage struct {
 	Until int `json:"until"`
 }
 
-// LatestWeight will retrieve the latest weight in by date.
+// LatestWeight will retrieve the latest weight by date.
 func (c *Client) LatestWeight(date time.Time) (*Weightin, error) {
 	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/weight-service/weight/latest?date=%04d-%02d-%02d",
 		date.Year(),
@@ -52,8 +45,7 @@ func (c *Client) LatestWeight(date time.Time) (*Weightin, error) {
 }
 
 // Weightins will retrieve all weight ins between startDate and endDate. A
-// summary is provided as the first returned value. This summary is calculated
-// by Garmin Connect.
+// summary is provided as well. This summary is calculated by Garmin Connect.
 func (c *Client) Weightins(startDate time.Time, endDate time.Time) (*WeightAverage, []Weightin, error) {
 	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/weight-service/weight/dateRange?startDate=%s&endDate=%s",
 		formatDate(startDate),

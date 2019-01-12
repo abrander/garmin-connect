@@ -17,7 +17,8 @@ var (
 	ErrForbidden = errors.New("Forbidden")
 
 	// ErrNotAuthenticated will be returned is the client is not
-	// authenticated. Remember to call Authenticate().
+	// authenticated as required by the request. Remember to call
+	// Authenticate().
 	ErrNotAuthenticated = errors.New("Client is not authenticated")
 
 	// ErrWrongCredentials will be returned if the username and/or
@@ -31,7 +32,8 @@ type Client struct {
 	sessionid *http.Cookie
 }
 
-// NewClient returns a new client for accessing the unofficial Garmin Connect API.
+// NewClient returns a new client for accessing the unofficial Garmin Connect
+// API.
 func NewClient() *Client {
 	return &Client{
 		client: &http.Client{
@@ -107,7 +109,7 @@ func (c *Client) authenticated() bool {
 	return c.sessionid != nil
 }
 
-// Authenticate using Garmin Connect username and password.
+// Authenticate using a Garmin Connect username and password.
 func (c *Client) Authenticate(username string, password string) error {
 	URL := "https://sso.garmin.com/sso/signin?service=https%3A%2F%2Fconnect.garmin.com%2Fmodern%2F"
 
@@ -154,7 +156,8 @@ func (c *Client) Authenticate(username string, password string) error {
 		return ErrWrongCredentials
 	}
 
-	// The session id will not be valid until we follow the redirect.
+	// The session id will not be valid until we redeem the sessions by
+	// following the redirect.
 	location := resp.Header.Get("Location")
 	_, err = c.getString(location)
 	if err != nil {
