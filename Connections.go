@@ -5,7 +5,7 @@ package connect
 func (c *Client) Connections(displayName string) ([]SocialProfile, error) {
 	URL := "https://connect.garmin.com/modern/proxy/userprofile-service/socialProfile/connections/" + displayName
 
-	if !c.authenticated() {
+	if !c.authenticated() && displayName == "" {
 		return nil, ErrNotAuthenticated
 	}
 

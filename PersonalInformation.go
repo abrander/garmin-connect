@@ -31,10 +31,6 @@ type PersonalInformation struct {
 func (c *Client) PersonalInformation(displayName string) (*PersonalInformation, error) {
 	URL := "https://connect.garmin.com/modern/proxy/userprofile-service/userprofile/personal-information/" + displayName
 
-	if !c.authenticated() {
-		return nil, ErrNotAuthenticated
-	}
-
 	pi := new(PersonalInformation)
 
 	err := c.getJSON(URL, pi)

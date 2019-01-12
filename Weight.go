@@ -81,7 +81,7 @@ func (c *Client) DeleteWeightin(date time.Time) error {
 		return err
 	}
 
-	resp, err := c.client.Do(req)
+	resp, err := c.do(req)
 	if err != nil {
 		return err
 	}
@@ -119,7 +119,7 @@ func (c *Client) AddUserWeight(date time.Time, weight float64) error {
 	req.Header.Add("nk", "NT") // Yep. This is needed. No idea what it does.
 	req.Header.Add("content-type", "application/json")
 
-	resp, err := c.client.Do(req)
+	resp, err := c.do(req)
 	if err != nil {
 		return err
 	}

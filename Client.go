@@ -12,6 +12,10 @@ import (
 )
 
 var (
+	// ErrForbidden will be returned if the client doesn't have access to the
+	// requested ressource.
+	ErrForbidden = errors.New("Forbidden")
+
 	// ErrNotAuthenticated will be returned is the client is not
 	// authenticated. Remember to call Authenticate().
 	ErrNotAuthenticated = errors.New("Client is not authenticated")
@@ -58,7 +62,7 @@ func (c *Client) getJSON(URL string, target interface{}) error {
 		return err
 	}
 
-	resp, err := c.client.Do(req)
+	resp, err := c.do(req)
 	if err != nil {
 		return err
 	}
@@ -75,7 +79,7 @@ func (c *Client) getString(URL string) (string, error) {
 		return "", err
 	}
 
-	resp, err := c.client.Do(req)
+	resp, err := c.do(req)
 	if err != nil {
 		return "", err
 	}
@@ -90,7 +94,13 @@ func (c *Client) getString(URL string) (string, error) {
 }
 
 func (c *Client) do(req *http.Request) (*http.Response, error) {
-	return c.client.Do(req)
+	resp, err := c.client.Do(req)
+	if resp.StatusCode == http.StatusForbidden {
+		resp.Body.Close()
+		return nil, ErrForbidden
+	}
+
+	return resp, err
 }
 
 func (c *Client) authenticated() bool {

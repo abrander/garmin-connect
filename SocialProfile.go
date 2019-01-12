@@ -71,11 +71,12 @@ type SocialProfile struct {
 func (c *Client) SocialProfile(displayName string) (*SocialProfile, error) {
 	URL := "https://connect.garmin.com/modern/proxy/userprofile-service/socialProfile/" + displayName
 
-	if !c.authenticated() {
-		return nil, ErrNotAuthenticated
+	profile := new(SocialProfile)
+
+	err := c.getJSON(URL, profile)
+	if err != nil {
+		return nil, err
 	}
 
-	var profile SocialProfile
-	err := c.getJSON(URL, &profile)
-	return &profile, err
+	return profile, err
 }
