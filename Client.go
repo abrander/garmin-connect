@@ -54,6 +54,9 @@ func (c *Client) newRequest(method string, url string, body io.Reader) (*http.Re
 		return nil, err
 	}
 
+	// Play nice and give Garmin engineers a way to contact us.
+	req.Header.Set("User-Agent", "github.com/abrander/garmin-connect")
+
 	// If sessionid is known, add the cookie.
 	if c.sessionid != nil {
 		req.AddCookie(c.sessionid)
