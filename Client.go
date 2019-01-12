@@ -16,6 +16,10 @@ var (
 	// requested ressource.
 	ErrForbidden = errors.New("Forbidden")
 
+	// ErrNotFound will be returned if the requested ressource could not be
+	// found.
+	ErrNotFound = errors.New("Not found")
+
 	// ErrNotAuthenticated will be returned is the client is not
 	// authenticated as required by the request. Remember to call
 	// Authenticate().
@@ -97,9 +101,13 @@ func (c *Client) getString(URL string) (string, error) {
 
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	resp, err := c.client.Do(req)
-	if resp.StatusCode == http.StatusForbidden {
+	switch resp.StatusCode {
+	case http.StatusForbidden:
 		resp.Body.Close()
 		return nil, ErrForbidden
+	case http.StatusNotFound:
+		resp.Body.Close()
+		return nil, ErrNotFound
 	}
 
 	return resp, err

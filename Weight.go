@@ -51,6 +51,10 @@ func (c *Client) Weightins(startDate time.Time, endDate time.Time) (*WeightAvera
 		formatDate(startDate),
 		formatDate(endDate))
 
+	if !c.authenticated() {
+		return nil, nil, ErrNotAuthenticated
+	}
+
 	var proxy struct {
 		DateWeightList []Weightin     `json:"dateWeightList"`
 		TotalAverage   *WeightAverage `json:"totalAverage"`
@@ -67,6 +71,10 @@ func (c *Client) Weightins(startDate time.Time, endDate time.Time) (*WeightAvera
 // DeleteWeightin will delete all biometric data for date.
 func (c *Client) DeleteWeightin(date time.Time) error {
 	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/biometric-service/biometric/%s", formatDate(date))
+
+	if !c.authenticated() {
+		return ErrNotAuthenticated
+	}
 
 	req, err := c.newRequest("DELETE", URL, nil)
 	if err != nil {
