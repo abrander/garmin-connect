@@ -33,6 +33,10 @@ type ActivityType struct {
 func (c *Client) Activities(displayName string, start int, limit int) ([]Activity, error) {
 	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/activitylist-service/activities/%s?start=%d&limit=%d", displayName, start, limit)
 
+	if !c.authenticated() && displayName == "" {
+		return nil, ErrNotAuthenticated
+	}
+
 	var proxy struct {
 		List []Activity `json:"activityList"`
 	}
