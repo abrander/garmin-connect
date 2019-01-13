@@ -55,6 +55,25 @@ func (c *Client) AdhocChallenges() ([]AdhocChallenge, error) {
 	return challenges, nil
 }
 
+// HistoricalAdhocChallenges will retrieve the list of completed ad-hoc
+// challenges.
+func (c *Client) HistoricalAdhocChallenges() ([]AdhocChallenge, error) {
+	URL := "https://connect.garmin.com/modern/proxy/adhocchallenge-service/adHocChallenge/historical"
+
+	if !c.authenticated() {
+		return nil, ErrNotAuthenticated
+	}
+
+	challenges := make([]AdhocChallenge, 0, 100)
+
+	err := c.getJSON(URL, &challenges)
+	if err != nil {
+		return nil, err
+	}
+
+	return challenges, nil
+}
+
 // AdhocChallenge will retrieve details for challenge with uuid.
 func (c *Client) AdhocChallenge(uuid string) (*AdhocChallenge, error) {
 	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/adhocchallenge-service/adHocChallenge/%s", uuid)
