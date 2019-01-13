@@ -1,12 +1,14 @@
 package connect
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 )
 
 // Activity describes a Garmin Connect activity.
 type Activity struct {
-	ActivityID      int          `json:"activityId"`
+	ID              int          `json:"activityId"`
 	ActivityName    string       `json:"activityName"`
 	Description     string       `json:"description"`
 	StartTimeLocal  string       `json:"startTimeLocal"`
@@ -47,4 +49,41 @@ func (c *Client) Activities(displayName string, start int, limit int) ([]Activit
 	}
 
 	return proxy.List, nil
+}
+
+// RenameActivity can be used to rename an activity.
+func (c *Client) RenameActivity(activityID int, newName string) error {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/activity-service/activity/%d", activityID)
+
+	payload := struct {
+		ID   int    `json:"activityId"`
+		Name string `json:"activityName"`
+	}{activityID, newName}
+
+	body := bytes.NewBuffer(nil)
+	enc := json.NewEncoder(body)
+	err := enc.Encode(payload)
+	if err != nil {
+		return err
+	}
+
+	req, err := c.newRequest("PUT", URL, body)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("nk", "NT")
+	req.Header.Add("content-type", "application/json")
+
+	resp, err := c.do(req)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+
+	if resp.StatusCode != 204 {
+		return fmt.Errorf("HTTP call returned %d", resp.StatusCode)
+	}
+
+	return nil
 }
