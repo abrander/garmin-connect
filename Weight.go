@@ -131,3 +131,30 @@ func (c *Client) AddUserWeight(date time.Time, weight float64) error {
 
 	return nil
 }
+
+// WeightByDate retrieves the weight of date if available. If no weight data
+// for date exists, it will return ErrNotFound.
+func (c *Client) WeightByDate(date time.Time) (Time, float64, error) {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/biometric-service/biometric/weightByDate?date=%s",
+		formatDate(date))
+
+	if !c.authenticated() {
+		return Time{}, 0.0, ErrNotAuthenticated
+	}
+
+	var proxy []struct {
+		TimeStamp Time    `json:"weightDate"`
+		Weight    float64 `json:"weight"` // gram
+	}
+
+	err := c.getJSON(URL, &proxy)
+	if err != nil {
+		return Time{}, 0.0, err
+	}
+
+	if len(proxy) < 1 {
+		return Time{}, 0.0, ErrNotFound
+	}
+
+	return proxy[0].TimeStamp, proxy[0].Weight, nil
+}
