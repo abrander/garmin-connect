@@ -11,8 +11,8 @@ type Activity struct {
 	ID              int          `json:"activityId"`
 	ActivityName    string       `json:"activityName"`
 	Description     string       `json:"description"`
-	StartTimeLocal  string       `json:"startTimeLocal"`
-	StartTimeGMT    string       `json:"startTimeGMT"`
+	StartLocal      Time         `json:"startTimeLocal"`
+	StartGMT        Time         `json:"startTimeGMT"`
 	ActivityType    ActivityType `json:"activityType"`
 	Distance        float64      `json:"distance"` // meter
 	Duration        float64      `json:"duration"`

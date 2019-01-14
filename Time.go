@@ -13,7 +13,10 @@ type Time struct{ time.Time }
 // returned from connect.garmin.com.
 func (t *Time) UnmarshalJSON(value []byte) error {
 	// FIXME: Somehow we should deal with timezones :-/
-	layout := "2006-01-02T15:04:05.0"
+	layouts := []string{
+		"2006-01-02T15:04:05.0",
+		"2006-01-02 15:04:05",
+	}
 
 	var blip string
 	err := json.Unmarshal(value, &blip)
@@ -21,9 +24,12 @@ func (t *Time) UnmarshalJSON(value []byte) error {
 		return err
 	}
 
-	proxy, err := time.Parse(layout, blip)
-	if err != nil {
-		return err
+	var proxy time.Time
+	for _, l := range layouts {
+		proxy, err = time.Parse(l, blip)
+		if err == nil {
+			break
+		}
 	}
 
 	t.Time = proxy
