@@ -8,18 +8,23 @@ import (
 
 // Activity describes a Garmin Connect activity.
 type Activity struct {
-	ID              int          `json:"activityId"`
-	ActivityName    string       `json:"activityName"`
-	Description     string       `json:"description"`
-	StartLocal      Time         `json:"startTimeLocal"`
-	StartGMT        Time         `json:"startTimeGMT"`
-	ActivityType    ActivityType `json:"activityType"`
-	Distance        float64      `json:"distance"` // meter
-	Duration        float64      `json:"duration"`
-	ElapsedDuration float64      `json:"elapsedDuration"`
-	MovingDuration  float64      `json:"movingDuration"`
-	AverageSpeed    float64      `json:"averageSpeed"`
-	MaxSpeed        float64      `json:"maxSpeed"`
+	ID               int          `json:"activityId"`
+	ActivityName     string       `json:"activityName"`
+	Description      string       `json:"description"`
+	StartLocal       Time         `json:"startTimeLocal"`
+	StartGMT         Time         `json:"startTimeGMT"`
+	ActivityType     ActivityType `json:"activityType"`
+	Distance         float64      `json:"distance"` // meter
+	Duration         float64      `json:"duration"`
+	ElapsedDuration  float64      `json:"elapsedDuration"`
+	MovingDuration   float64      `json:"movingDuration"`
+	AverageSpeed     float64      `json:"averageSpeed"`
+	MaxSpeed         float64      `json:"maxSpeed"`
+	OwnerID          int          `json:"ownerId"`
+	Calories         float64      `json:"calories"`
+	AverageHeartRate float64      `json:"averageHR"`
+	MaxHeartRate     float64      `json:"maxHR"`
+	DeviceID         int          `json:"deviceId"`
 }
 
 // ActivityType describes the type of activity.
