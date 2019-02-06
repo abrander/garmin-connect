@@ -9,7 +9,7 @@ import (
 
 // Weightin is a single weight event.
 type Weightin struct {
-	Date              int     `json:"date"`
+	Date              Date    `json:"date"`
 	Version           int     `json:"version"`
 	Weight            float64 `json:"weight"`     // gram
 	BMI               float64 `json:"bmi"`        // weight / height²
