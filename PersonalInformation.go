@@ -4,7 +4,7 @@ package connect
 type BiometricProfile struct {
 	UserID        int     `json:"userId"`
 	Height        float64 `json:"height"`
-	Weight        float64 `json:"weight"`
+	Weight        float64 `json:"weight"` // grams
 	VO2Max        float64 `json:"vo2Max"`
 	VO2MaxCycling float64 `json:"vo2MaxCycling"`
 }
