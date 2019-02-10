@@ -3,6 +3,7 @@ package connect
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -20,8 +21,20 @@ func (d Date) Time() time.Time {
 
 // UnmarshalJSON implements json.Unmarshaler.
 func (d *Date) UnmarshalJSON(value []byte) error {
+	// Sometimes dates are transferred as milliseconds since epoch :-/
+	i, err := strconv.ParseInt(string(value), 10, 64)
+	if err == nil {
+		t := time.Unix(i/1000, 0)
+
+		d.Year = t.Year()
+		d.Month = int(t.Month())
+		d.DayOfMonth = t.Day()
+
+		return nil
+	}
+
 	var blip string
-	err := json.Unmarshal(value, &blip)
+	err = json.Unmarshal(value, &blip)
 	if err != nil {
 		return err
 	}
