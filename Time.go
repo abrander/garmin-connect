@@ -2,6 +2,7 @@ package connect
 
 import (
 	"encoding/json"
+	"strconv"
 	"time"
 )
 
@@ -12,6 +13,14 @@ type Time struct{ time.Time }
 // UnmarshalJSON implements json.Unmarshaler. It can parse timestamps
 // returned from connect.garmin.com.
 func (t *Time) UnmarshalJSON(value []byte) error {
+	// Sometimes timestamps are transferred as milliseconds since epoch :-/
+	i, err := strconv.ParseInt(string(value), 10, 64)
+	if err == nil && i > 1500000000000 {
+		t.Time = time.Unix(i/1000, 0)
+
+		return nil
+	}
+
 	// FIXME: Somehow we should deal with timezones :-/
 	layouts := []string{
 		"2006-01-02T15:04:05.0",
@@ -19,7 +28,7 @@ func (t *Time) UnmarshalJSON(value []byte) error {
 	}
 
 	var blip string
-	err := json.Unmarshal(value, &blip)
+	err = json.Unmarshal(value, &blip)
 	if err != nil {
 		return err
 	}
