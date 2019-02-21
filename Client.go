@@ -104,6 +104,10 @@ func (c *Client) getString(URL string) (string, error) {
 
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
 	switch resp.StatusCode {
 	case http.StatusForbidden:
 		resp.Body.Close()
