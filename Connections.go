@@ -3,7 +3,9 @@ package connect
 // Connections will list the connections of displayName. If displayName is
 // empty, the current authenticated users connection list wil be returned.
 func (c *Client) Connections(displayName string) ([]SocialProfile, error) {
-	URL := "https://connect.garmin.com/modern/proxy/userprofile-service/socialProfile/connections/" + displayName
+	// There also exist an endpoint without /pagination/ but it will return
+	// 403 for *some* connections.
+	URL := "https://connect.garmin.com/modern/proxy/userprofile-service/socialProfile/connections/pagination/" + displayName
 
 	if !c.authenticated() && displayName == "" {
 		return nil, ErrNotAuthenticated
