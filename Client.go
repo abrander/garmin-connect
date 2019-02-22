@@ -20,6 +20,10 @@ var (
 	// found.
 	ErrNotFound = errors.New("Not found")
 
+	// ErrNoCredentials will be returned if credentials are needed - but none
+	// are set.
+	ErrNoCredentials = errors.New("No credentials set")
+
 	// ErrNotAuthenticated will be returned is the client is not
 	// authenticated as required by the request. Remember to call
 	// Authenticate().
@@ -30,22 +34,81 @@ var (
 	ErrWrongCredentials = errors.New("Username and/or password not recognized")
 )
 
+const (
+	// sessionCookieName is the magic session cookie name.
+	sessionCookieName = "SESSIONID"
+)
+
 // Client can be used to access the unofficial Garmin Connect API.
 type Client struct {
-	client    *http.Client
-	sessionid *http.Cookie
+	client           *http.Client
+	sessionid        *http.Cookie
+	login            string
+	password         string
+	autoRenewSession bool
+}
+
+// SessionID will set a predefined session ID. This can be useful for clients
+// keeping state. A few HTTP roundtrips can be saved, if the session ID is
+// reused. And some load wouyld be taken of Garmin servers.
+func SessionID(sessionID string) func(*Client) {
+	return func(c *Client) {
+		if sessionID != "" {
+			c.sessionid = &http.Cookie{
+				Value: sessionID,
+				Name:  sessionCookieName,
+			}
+		}
+	}
+}
+
+// Credentials can be used to pass login credentials to NewClient.
+func Credentials(email string, password string) func(*Client) {
+	return func(c *Client) {
+		c.login = email
+		c.password = password
+	}
+}
+
+// AutoRenewSession will set if the session should be autorenewed upon expire.
+// Default is true.
+func AutoRenewSession(autoRenew bool) func(*Client) {
+	return func(c *Client) {
+		c.autoRenewSession = autoRenew
+	}
 }
 
 // NewClient returns a new client for accessing the unofficial Garmin Connect
 // API.
-func NewClient() *Client {
-	return &Client{
+func NewClient(options ...func(*Client)) *Client {
+	client := &Client{
 		client: &http.Client{
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
 			},
 		},
+		autoRenewSession: true,
 	}
+
+	client.SetOptions(options...)
+
+	return client
+}
+
+// SetOptions can be used to set various options on Client.
+func (c *Client) SetOptions(options ...func(*Client)) {
+	for _, option := range options {
+		option(c)
+	}
+}
+
+// SessionID returns the current known session ID.
+func (c *Client) SessionID() string {
+	if c.sessionid != nil {
+		return c.sessionid.Value
+	}
+
+	return ""
 }
 
 func (c *Client) newRequest(method string, url string, body io.Reader) (*http.Request, error) {
@@ -108,6 +171,38 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
+	// This is exciting. If the user does not have permission to access a
+	// ressource, the API will return an ApplicationException and return a
+	// 403 status code.
+	// If the session is invalid, the Garmin API will return the same exception
+	// and status code (!).
+	// To distinguish between these two error cases, we look for a new session
+	// cookie in the response. If a new session cookies is set by Garmin, we
+	// assume our current session is invalid.
+	for _, cookie := range resp.Cookies() {
+		if cookie.Name == sessionCookieName {
+			// Wups. Our session got invalidated.
+			c.sessionid = nil
+
+			// Re-new session.
+			err = c.Authenticate()
+			if err != nil {
+				return nil, err
+			}
+
+			// Replace the cookie ned newRequest with the new sessionid.
+			req.Header.Del("Cookie")
+			req.AddCookie(c.sessionid)
+
+			// Replay the original request only once, if we fail twice
+			// something is rotten, and we should give up.
+			resp, err = c.client.Do(req)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	switch resp.StatusCode {
 	case http.StatusForbidden:
 		resp.Body.Close()
@@ -124,14 +219,21 @@ func (c *Client) authenticated() bool {
 	return c.sessionid != nil
 }
 
-// Authenticate using a Garmin Connect username and password.
-func (c *Client) Authenticate(username string, password string) error {
+// Authenticate using a Garmin Connect username and password provided by
+// the Credentials option function.
+func (c *Client) Authenticate() error {
+	// We cannot use Client.do() in this function, since this function can be
+	// called from do() upon session renewal.
 	URL := "https://sso.garmin.com/sso/signin?service=https%3A%2F%2Fconnect.garmin.com%2Fmodern%2F"
+
+	if c.login == "" || c.password == "" {
+		return ErrNoCredentials
+	}
 
 	// Get ticket from Garmin SSO.
 	resp, err := c.client.PostForm(URL, url.Values{
-		"username": {username},
-		"password": {password},
+		"username": {c.login},
+		"password": {c.password},
 		"embed":    {"false"},
 	})
 	if err != nil {
@@ -154,7 +256,7 @@ func (c *Client) Authenticate(username string, password string) error {
 
 	// Use ticket to request session.
 	req, _ := c.newRequest("GET", ticketURL, nil)
-	resp, err = c.do(req)
+	resp, err = c.client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -162,7 +264,7 @@ func (c *Client) Authenticate(username string, password string) error {
 
 	// Look for the needed sessionid cookie.
 	for _, cookie := range resp.Cookies() {
-		if cookie.Name == "SESSIONID" {
+		if cookie.Name == sessionCookieName {
 			c.sessionid = cookie
 		}
 	}
