@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var (
@@ -46,6 +47,7 @@ type Client struct {
 	login            string
 	password         string
 	autoRenewSession bool
+	debugLogger      Logger
 }
 
 // SessionID will set a predefined session ID. This can be useful for clients
@@ -78,6 +80,13 @@ func AutoRenewSession(autoRenew bool) func(*Client) {
 	}
 }
 
+// DebugLogger is used to set a debug logger.
+func DebugLogger(logger Logger) func(*Client) {
+	return func(c *Client) {
+		c.debugLogger = logger
+	}
+}
+
 // NewClient returns a new client for accessing the unofficial Garmin Connect
 // API.
 func NewClient(options ...func(*Client)) *Client {
@@ -88,6 +97,7 @@ func NewClient(options ...func(*Client)) *Client {
 			},
 		},
 		autoRenewSession: true,
+		debugLogger:      &discardLog{},
 	}
 
 	client.SetOptions(options...)
@@ -166,6 +176,9 @@ func (c *Client) getString(URL string) (string, error) {
 }
 
 func (c *Client) do(req *http.Request) (*http.Response, error) {
+	c.debugLogger.Printf("Requesting %s at %s", req.Method, req.URL.String())
+
+	t0 := time.Now()
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
@@ -181,6 +194,8 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 	// assume our current session is invalid.
 	for _, cookie := range resp.Cookies() {
 		if cookie.Name == sessionCookieName {
+			c.debugLogger.Printf("Session invalid, requesting new session")
+
 			// Wups. Our session got invalidated.
 			c.sessionid = nil
 
@@ -190,18 +205,25 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 				return nil, err
 			}
 
+			c.debugLogger.Printf("Successfully authenticated as %s", c.login)
+
 			// Replace the cookie ned newRequest with the new sessionid.
 			req.Header.Del("Cookie")
 			req.AddCookie(c.sessionid)
 
+			c.debugLogger.Printf("Replaying %s request to %s", req.Method, req.URL.String())
+
 			// Replay the original request only once, if we fail twice
 			// something is rotten, and we should give up.
+			t0 = time.Now()
 			resp, err = c.client.Do(req)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
+
+	c.debugLogger.Printf("Got HTTP status code %d in %s", resp.StatusCode, time.Since(t0).String())
 
 	switch resp.StatusCode {
 	case http.StatusForbidden:
@@ -230,6 +252,8 @@ func (c *Client) Authenticate() error {
 		return ErrNoCredentials
 	}
 
+	c.debugLogger.Printf("Trying credentials at %s", URL)
+
 	// Get ticket from Garmin SSO.
 	resp, err := c.client.PostForm(URL, url.Values{
 		"username": {c.login},
@@ -254,6 +278,8 @@ func (c *Client) Authenticate() error {
 		return ErrWrongCredentials
 	}
 
+	c.debugLogger.Printf("Requesting session at ticket URL %s", ticketURL)
+
 	// Use ticket to request session.
 	req, _ := c.newRequest("GET", ticketURL, nil)
 	resp, err = c.client.Do(req)
@@ -265,17 +291,23 @@ func (c *Client) Authenticate() error {
 	// Look for the needed sessionid cookie.
 	for _, cookie := range resp.Cookies() {
 		if cookie.Name == sessionCookieName {
+			c.debugLogger.Printf("Found session cookie with value %s", cookie.Value)
+
 			c.sessionid = cookie
 		}
 	}
 
 	if c.sessionid == nil {
+		c.debugLogger.Printf("No sessionid found")
+
 		return ErrWrongCredentials
 	}
 
 	// The session id will not be valid until we redeem the sessions by
 	// following the redirect.
 	location := resp.Header.Get("Location")
+	c.debugLogger.Printf("Redeeming session id at %s", location)
+
 	_, err = c.getString(location)
 	if err != nil {
 		return err
