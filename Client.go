@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"regexp"
 	"strings"
@@ -48,6 +49,7 @@ type Client struct {
 	password         string
 	autoRenewSession bool
 	debugLogger      Logger
+	dumpWriter       io.Writer
 }
 
 // SessionID will set a predefined session ID. This can be useful for clients
@@ -87,6 +89,14 @@ func DebugLogger(logger Logger) func(*Client) {
 	}
 }
 
+// DumpWriter will instruct Client to dump all HTTP requests and responses to
+// and from Garmin to w.
+func DumpWriter(w io.Writer) func(*Client) {
+	return func(c *Client) {
+		c.dumpWriter = w
+	}
+}
+
 // NewClient returns a new client for accessing the unofficial Garmin Connect
 // API.
 func NewClient(options ...func(*Client)) *Client {
@@ -98,6 +108,7 @@ func NewClient(options ...func(*Client)) *Client {
 		},
 		autoRenewSession: true,
 		debugLogger:      &discardLog{},
+		dumpWriter:       nil,
 	}
 
 	client.SetOptions(options...)
@@ -119,6 +130,26 @@ func (c *Client) SessionID() string {
 	}
 
 	return ""
+}
+
+func (c *Client) dump(reqResp interface{}) {
+	if c.dumpWriter == nil {
+		return
+	}
+
+	var dump []byte
+	switch reqResp.(type) {
+	case *http.Request:
+		c.dumpWriter.Write([]byte("\n\nREQUEST\n"))
+		dump, _ = httputil.DumpRequestOut(reqResp.(*http.Request), true)
+	case *http.Response:
+		c.dumpWriter.Write([]byte("\n\nRESPONSE\n"))
+		dump, _ = httputil.DumpResponse(reqResp.(*http.Response), true)
+	default:
+		panic("unsupported type")
+	}
+
+	c.dumpWriter.Write(dump)
 }
 
 func (c *Client) newRequest(method string, url string, body io.Reader) (*http.Request, error) {
@@ -178,11 +209,13 @@ func (c *Client) getString(URL string) (string, error) {
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	c.debugLogger.Printf("Requesting %s at %s", req.Method, req.URL.String())
 
+	c.dump(req)
 	t0 := time.Now()
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
+	c.dump(resp)
 
 	// This is exciting. If the user does not have permission to access a
 	// ressource, the API will return an ApplicationException and return a
@@ -213,6 +246,8 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 
 			c.debugLogger.Printf("Replaying %s request to %s", req.Method, req.URL.String())
 
+			c.dump(req)
+
 			// Replay the original request only once, if we fail twice
 			// something is rotten, and we should give up.
 			t0 = time.Now()
@@ -222,6 +257,8 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 			}
 		}
 	}
+
+	c.dump(resp)
 
 	c.debugLogger.Printf("Got HTTP status code %d in %s", resp.StatusCode, time.Since(t0).String())
 
@@ -263,6 +300,7 @@ func (c *Client) Authenticate() error {
 	if err != nil {
 		return err
 	}
+	c.dump(resp)
 
 	body, _ := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
@@ -282,10 +320,12 @@ func (c *Client) Authenticate() error {
 
 	// Use ticket to request session.
 	req, _ := c.newRequest("GET", ticketURL, nil)
+	c.dump(req)
 	resp, err = c.client.Do(req)
 	if err != nil {
 		return err
 	}
+	c.dump(resp)
 	resp.Body.Close()
 
 	// Look for the needed sessionid cookie.
@@ -308,10 +348,13 @@ func (c *Client) Authenticate() error {
 	location := resp.Header.Get("Location")
 	c.debugLogger.Printf("Redeeming session id at %s", location)
 
-	_, err = c.getString(location)
+	req, _ = c.newRequest("GET", location, nil)
+	resp, err = c.client.Do(req)
 	if err != nil {
 		return err
 	}
+	c.dump(resp)
+	resp.Body.Close()
 
 	return nil
 }
