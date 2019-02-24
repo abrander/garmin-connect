@@ -378,7 +378,12 @@ func (c *Client) Signout() error {
 		return err
 	}
 
-	resp, err := c.do(req)
+	if c.sessionid == nil {
+		return nil
+	}
+
+	req.AddCookie(c.sessionid)
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
