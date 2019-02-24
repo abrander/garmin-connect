@@ -29,16 +29,23 @@ func stateFilename() string {
 }
 
 func loadState() {
-	data, _ := ioutil.ReadFile(stateFilename())
-	err := json.Unmarshal(data, &state)
+	client = connect.NewClient(
+		connect.AutoRenewSession(true),
+	)
+	data, err := ioutil.ReadFile(stateFilename())
+	if err != nil {
+		log.Printf("Could not open state file: %s", err.Error())
+		return
+	}
+
+	err = json.Unmarshal(data, &state)
 	if err != nil {
 		log.Fatalf("Could not unmarshal state: %s", err.Error())
 	}
 
-	client = connect.NewClient(
+	client.SetOptions(
 		connect.Credentials(state.Email, state.Password),
 		connect.SessionID(state.SessionID),
-		connect.AutoRenewSession(true),
 	)
 }
 
