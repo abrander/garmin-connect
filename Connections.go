@@ -116,3 +116,19 @@ func (c *Client) SearchConnections(keyword string) ([]SocialProfile, error) {
 
 	return proxy.Profiles, nil
 }
+
+// RemoveConnection will remove a connection.
+func (c *Client) RemoveConnection(connectionRequestID int) error {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/userprofile-service/connection/end/%d", connectionRequestID)
+
+	req, err := c.newRequest("PUT", URL, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("nk", "NT")
+
+	_, err = c.do(req)
+
+	return err
+}
