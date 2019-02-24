@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/url"
+	"strings"
 )
 
 // Connections will list the connections of displayName. If displayName is
@@ -77,4 +79,40 @@ func (c *Client) AcceptConnection(connectionRequestID int) error {
 	}
 
 	return nil
+}
+
+func (c *Client) SearchConnections(keyword string) ([]SocialProfile, error) {
+	URL := "https://connect.garmin.com/modern/proxy/usersearch-service/search"
+
+	payload := url.Values{
+		"start":   {"1"},
+		"limit":   {"20"},
+		"keyword": {keyword},
+	}
+
+	req, err := c.newRequest("POST", URL, strings.NewReader(payload.Encode()))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("nk", "NT")
+	req.Header.Add("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
+
+	resp, err := c.do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var proxy struct {
+		Profiles []SocialProfile `json:"profileList"`
+	}
+
+	dec := json.NewDecoder(resp.Body)
+	err = dec.Decode(&proxy)
+	if err != nil {
+		return nil, err
+	}
+
+	return proxy.Profiles, nil
 }
