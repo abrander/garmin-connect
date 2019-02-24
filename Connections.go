@@ -132,3 +132,19 @@ func (c *Client) RemoveConnection(connectionRequestID int) error {
 
 	return err
 }
+
+// RequestConnection will request a connection with displayName.
+func (c *Client) RequestConnection(displayName string) error {
+	URL := "https://connect.garmin.com/modern/proxy/userprofile-service/connection/request/" + displayName
+
+	req, err := c.newRequest("PUT", URL, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("nk", "NT")
+
+	_, err = c.do(req)
+
+	return err
+}
