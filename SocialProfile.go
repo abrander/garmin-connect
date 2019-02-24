@@ -4,6 +4,7 @@ package connect
 type SocialProfile struct {
 	ID                    int      `json:"id"`
 	ProfileID             int      `json:"profileId"`
+	ConnectionRequestID   int      `json:"connectionRequestId"`
 	GarminGUID            string   `json:"garminGUID"`
 	DisplayName           string   `json:"displayName"`
 	Fullname              string   `json:"fullName"`

@@ -1,5 +1,11 @@
 package connect
 
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+)
+
 // Connections will list the connections of displayName. If displayName is
 // empty, the current authenticated users connection list wil be returned.
 func (c *Client) Connections(displayName string) ([]SocialProfile, error) {
@@ -39,4 +45,36 @@ func (c *Client) PendingConnections() ([]SocialProfile, error) {
 	}
 
 	return pending, nil
+}
+
+// AcceptConnection will accept a pending connection.
+func (c *Client) AcceptConnection(connectionRequestID int) error {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/userprofile-service/connection/accept/%d", connectionRequestID)
+	payload := struct {
+		ConnectionRequestID int `json:"connectionRequestId"`
+	}{
+		ConnectionRequestID: connectionRequestID,
+	}
+
+	body := bytes.NewBuffer(nil)
+	enc := json.NewEncoder(body)
+	err := enc.Encode(payload)
+	if err != nil {
+		return err
+	}
+
+	req, err := c.newRequest("PUT", URL, body)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("nk", "NT")
+	req.Header.Add("content-type", "application/json")
+
+	_, err = c.do(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
