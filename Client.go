@@ -22,6 +22,9 @@ var (
 	// found.
 	ErrNotFound = errors.New("Not found")
 
+	// ErrBadRequest will be returned if Garmin returned a status code 400.
+	ErrBadRequest = errors.New("Bad request")
+
 	// ErrNoCredentials will be returned if credentials are needed - but none
 	// are set.
 	ErrNoCredentials = errors.New("No credentials set")
@@ -263,6 +266,9 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 	c.debugLogger.Printf("Got HTTP status code %d in %s", resp.StatusCode, time.Since(t0).String())
 
 	switch resp.StatusCode {
+	case http.StatusBadRequest:
+		resp.Body.Close()
+		return nil, ErrBadRequest
 	case http.StatusForbidden:
 		resp.Body.Close()
 		return nil, ErrForbidden
