@@ -280,6 +280,26 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 	return resp, err
 }
 
+func (c *Client) download(URL string, w io.Writer) error {
+	req, err := c.newRequest("GET", URL, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	_, err = io.Copy(w, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *Client) authenticated() bool {
 	return c.sessionid != nil
 }

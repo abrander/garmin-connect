@@ -3,7 +3,9 @@ package connect
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 )
 
 // Activity describes a Garmin Connect activity.
@@ -91,4 +93,42 @@ func (c *Client) RenameActivity(activityID int, newName string) error {
 	}
 
 	return nil
+}
+
+const (
+	// FormatFIT is the "original" Garmin format. Please note that this will be written as a ZIP file (!).
+	FormatFIT = iota
+
+	// FormatTCX is Training Center XML (TCX) format.
+	FormatTCX
+
+	// FormatGPX will export as GPX - the GPS Exchange Format.
+	FormatGPX
+
+	// FormatKML will export KML files compatible with Google Earth.
+	FormatKML
+
+	// FormatCSV will export splits as CSV.
+	FormatCSV
+
+	formatMax
+)
+
+// ExportActivity will export an activity from Connect. The activity will be written til w.
+func (c *Client) ExportActivity(id int, w io.Writer, format int) error {
+	formatTable := [formatMax]string{
+		"https://connect.garmin.com/modern/proxy/download-service/files/activity/%d",
+		"https://connect.garmin.com/modern/proxy/download-service/export/tcx/activity/%d",
+		"https://connect.garmin.com/modern/proxy/download-service/export/gpx/activity/%d",
+		"https://connect.garmin.com/modern/proxy/download-service/export/kml/activity/%d",
+		"https://connect.garmin.com/modern/proxy/download-service/export/csv/activity/%d",
+	}
+
+	if format >= formatMax || format < FormatFIT {
+		return errors.New("Invalid format")
+	}
+
+	URL := fmt.Sprintf(formatTable[format], id)
+
+	return c.download(URL, w)
 }
