@@ -67,9 +67,9 @@ func connectionsList(_ *cobra.Command, args []string) {
 	bail(err)
 
 	t := uitable.New()
-	t.AddRow("RequestID", "Display Name", "Name", "Location", "Profile Image")
+	t.AddRow("Display Name", "Name", "Location", "Profile Image")
 	for _, c := range connections {
-		t.AddRow(strconv.Itoa(c.ConnectionRequestID), c.DisplayName, c.Fullname, c.Location, c.ProfileImageURLMedium)
+		t.AddRow(c.DisplayName, c.Fullname, c.Location, c.ProfileImageURLMedium)
 	}
 	fmt.Println(t)
 }
