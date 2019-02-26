@@ -42,6 +42,13 @@ func init() {
 		Args: cobra.ExactArgs(1),
 	}
 	activitiesCmd.AddCommand(activitiesDeleteCmd)
+
+	activitiesRenameCmd := &cobra.Command{
+		Use:  "rename",
+		Run:  activitiesRename,
+		Args: cobra.ExactArgs(2),
+	}
+	activitiesCmd.AddCommand(activitiesRenameCmd)
 }
 
 func activitiesList(_ *cobra.Command, args []string) {
@@ -96,5 +103,15 @@ func activitiesDelete(_ *cobra.Command, args []string) {
 	bail(err)
 
 	err = client.DeleteActivity(activityID)
+	bail(err)
+}
+
+func activitiesRename(_ *cobra.Command, args []string) {
+	activityID, err := strconv.Atoi(args[0])
+	bail(err)
+
+	newName := args[1]
+
+	err = client.RenameActivity(activityID, newName)
 	bail(err)
 }
