@@ -132,3 +132,21 @@ func (c *Client) ExportActivity(id int, w io.Writer, format int) error {
 
 	return c.download(URL, w)
 }
+
+// DeleteActivity will permanently delete an activity.
+func (c *Client) DeleteActivity(id int) error {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/activity-service/activity/%d", id)
+
+	req, err := c.newRequest("DELETE", URL, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.do(req)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+
+	return nil
+}

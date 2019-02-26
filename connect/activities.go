@@ -35,6 +35,13 @@ func init() {
 	}
 	activitiesExportCmd.Flags().StringVarP(&exportFormat, "format", "f", "fit", "Format of export (fit (default), tcx, gpx, kml, csv)")
 	activitiesCmd.AddCommand(activitiesExportCmd)
+
+	activitiesDeleteCmd := &cobra.Command{
+		Use:  "delete",
+		Run:  activitiesDelete,
+		Args: cobra.ExactArgs(1),
+	}
+	activitiesCmd.AddCommand(activitiesDeleteCmd)
 }
 
 func activitiesList(_ *cobra.Command, args []string) {
@@ -81,5 +88,13 @@ func activitiesExport(_ *cobra.Command, args []string) {
 	bail(err)
 
 	err = client.ExportActivity(activityID, f, format)
+	bail(err)
+}
+
+func activitiesDelete(_ *cobra.Command, args []string) {
+	activityID, err := strconv.Atoi(args[0])
+	bail(err)
+
+	err = client.DeleteActivity(activityID)
 	bail(err)
 }
