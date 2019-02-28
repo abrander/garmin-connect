@@ -29,7 +29,7 @@ func weightLatest(_ *cobra.Command, _ []string) {
 	t.AddValueUnit("Weight", weightin.Weight/1000.0, "kg")
 	t.AddValueUnit("BMI", weightin.BMI, "kg/m2")
 	t.AddValueUnit("Fat", weightin.BodyFatPercentage, "%")
-	t.AddValueUnit("Water", weightin.BodyWater, "kg")
+	t.AddValueUnit("Water", weightin.BodyWater, "%")
 	t.AddValueUnit("Bone Mass", float64(weightin.BoneMass)/1000.0, "kg")
 	t.AddValueUnit("Muscle Mass", float64(weightin.MuscleMass)/1000.0, "kg")
 	t.Output(os.Stdout)
