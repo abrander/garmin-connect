@@ -21,8 +21,6 @@ func info(_ *cobra.Command, args []string) {
 		displayName = args[0]
 	}
 
-	//UserInfo:{Gender:FEMALE Email: Locale:da TimeZone:Europe/Paris Age:37} BiometricProfile:{UserID:60610314 Height:180 Weight:85569.99969482422 VO2Max:34 VO2MaxCycling:10}}
-
 	t := NewTabular()
 
 	socialProfile, err := client.SocialProfile(displayName)
