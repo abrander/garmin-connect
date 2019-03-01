@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -42,5 +43,15 @@ func info(_ *cobra.Command, args []string) {
 	t.AddValueUnit("Weight", info.BiometricProfile.Weight/1000.0, "kg")
 	t.AddValueUnit("Vo² Max", info.BiometricProfile.VO2Max, "mL/kg/min")
 	t.AddValueUnit("Vo² Max (cycling)", info.BiometricProfile.VO2MaxCycling, "mL/kg/min")
+
+	lastUsed, err := client.LastUsed(socialProfile.DisplayName)
+	bail(err)
+
+	t.AddValue("", "")
+	t.AddValue("Device ID", lastUsed.DeviceID)
+	t.AddValue("Device", lastUsed.DeviceName)
+	t.AddValue("Time", lastUsed.DeviceUploadTime.String())
+	t.AddValue("Ago", time.Since(lastUsed.DeviceUploadTime.Time).String())
+	t.AddValue("Image", lastUsed.ImageURL)
 	t.Output(os.Stdout)
 }
