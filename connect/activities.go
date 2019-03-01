@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
 
 	"github.com/abrander/garmin-connect"
@@ -57,12 +56,12 @@ func activitiesList(_ *cobra.Command, args []string) {
 	activities, err := client.Activities(displayName, 0, 100)
 	bail(err)
 
-	t := uitable.New()
-	t.AddRow("ID", "Name", "Type", "Distance")
+	t := NewTable()
+	t.AddHeader("ID", "Name", "Type", "Distance")
 	for _, a := range activities {
 		t.AddRow(strconv.Itoa(a.ID), a.ActivityName, a.ActivityType.TypeKey, fmt.Sprintf("%f", a.Distance))
 	}
-	fmt.Println(t)
+	t.Output(os.Stdout)
 }
 
 func activitiesExport(_ *cobra.Command, args []string) {

@@ -1,11 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 
-	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
 )
 
@@ -66,24 +64,24 @@ func connectionsList(_ *cobra.Command, args []string) {
 	connections, err := client.Connections(displayName)
 	bail(err)
 
-	t := uitable.New()
-	t.AddRow("Display Name", "Name", "Location", "Profile Image")
+	t := NewTable()
+	t.AddHeader("Display Name", "Name", "Location", "Profile Image")
 	for _, c := range connections {
 		t.AddRow(c.DisplayName, c.Fullname, c.Location, c.ProfileImageURLMedium)
 	}
-	fmt.Println(t)
+	t.Output(os.Stdout)
 }
 
 func connectionsPending(_ *cobra.Command, _ []string) {
 	connections, err := client.PendingConnections()
 	bail(err)
 
-	t := uitable.New()
-	t.AddRow("RequestID", "Display Name", "Name", "Location", "Profile Image")
+	t := NewTable()
+	t.AddHeader("RequestID", "Display Name", "Name", "Location", "Profile Image")
 	for _, c := range connections {
 		t.AddRow(strconv.Itoa(c.ConnectionRequestID), c.DisplayName, c.Fullname, c.Location, c.ProfileImageURLMedium)
 	}
-	fmt.Println(t)
+	t.Output(os.Stdout)
 }
 
 func connectionsRemove(_ *cobra.Command, args []string) {
