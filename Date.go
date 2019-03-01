@@ -47,6 +47,15 @@ func (d *Date) UnmarshalJSON(value []byte) error {
 	return nil
 }
 
+// ParseDate will parse a date in the format yyyy-mm-dd.
+func ParseDate(in string) (Date, error) {
+	d := Date{}
+
+	_, err := fmt.Sscanf(in, "%04d-%02d-%02d", &d.Year, &d.Month, &d.DayOfMonth)
+
+	return d, err
+}
+
 // String implements Stringer.
 func (d *Date) String() string {
 	return fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, d.DayOfMonth)
