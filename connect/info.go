@@ -34,7 +34,7 @@ func info(_ *cobra.Command, args []string) {
 	t.AddValue("Points", socialProfile.UserPoint)
 	t.AddValue("Profile Image", socialProfile.ProfileImageURLLarge)
 
-	info, err := client.PersonalInformation(displayName)
+	info, err := client.PersonalInformation(socialProfile.DisplayName)
 	bail(err)
 
 	t.AddValue("", "")
