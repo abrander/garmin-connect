@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -27,6 +28,13 @@ func init() {
 		Args: cobra.ExactArgs(2),
 	}
 	weightCmd.AddCommand(weightAddCmd)
+
+	weightDateCmd := &cobra.Command{
+		Use:  "date [yyyy-mm-dd]",
+		Run:  weightDate,
+		Args: cobra.ExactArgs(1),
+	}
+	weightCmd.AddCommand(weightDateCmd)
 }
 
 func weightLatest(_ *cobra.Command, _ []string) {
@@ -53,4 +61,23 @@ func weightAdd(_ *cobra.Command, args []string) {
 
 	err = client.AddUserWeight(date.Time(), float64(weight))
 	bail(err)
+}
+
+func weightDate(_ *cobra.Command, args []string) {
+	date, err := connect.ParseDate(args[0])
+	bail(err)
+
+	tim, weight, err := client.WeightByDate(date.Time())
+	bail(err)
+
+	zero := time.Time{}
+	if tim.Time == zero {
+		fmt.Printf("No weight ins on this date\n")
+		os.Exit(1)
+	}
+
+	t := NewTabular()
+	t.AddValue("Time", tim.String())
+	t.AddValueUnit("Weight", weight/1000.0, "kg")
+	t.Output(os.Stdout)
 }
