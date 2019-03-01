@@ -51,7 +51,7 @@ func info(_ *cobra.Command, args []string) {
 	t.AddValue("Device ID", lastUsed.DeviceID)
 	t.AddValue("Device", lastUsed.DeviceName)
 	t.AddValue("Time", lastUsed.DeviceUploadTime.String())
-	t.AddValue("Ago", time.Since(lastUsed.DeviceUploadTime.Time).String())
+	t.AddValue("Ago", time.Since(lastUsed.DeviceUploadTime.Time).Round(time.Second).String())
 	t.AddValue("Image", lastUsed.ImageURL)
 	t.Output(os.Stdout)
 }
