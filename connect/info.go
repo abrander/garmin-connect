@@ -44,6 +44,27 @@ func info(_ *cobra.Command, args []string) {
 	t.AddValueUnit("Vo² Max", info.BiometricProfile.VO2Max, "mL/kg/min")
 	t.AddValueUnit("Vo² Max (cycling)", info.BiometricProfile.VO2MaxCycling, "mL/kg/min")
 
+	life, err := client.LifetimeActivities(socialProfile.DisplayName)
+	bail(err)
+
+	t.AddValue("", "")
+	t.AddValue("Activities", life.Activities)
+	t.AddValueUnit("Distance", life.Distance/1000.0, "km")
+	t.AddValueUnit("Time", (time.Duration(life.Duration) * time.Second).Round(time.Second).String(), "hms")
+	t.AddValueUnit("Calories", life.Calories/4.184, "Kcal")
+	t.AddValueUnit("Elev Gain", life.ElevationGain, "m")
+
+	totals, err := client.LifetimeTotals(socialProfile.DisplayName)
+	bail(err)
+
+	t.AddValue("", "")
+	t.AddValueUnit("Steps", totals.Steps, "steps")
+	t.AddValueUnit("Distance", totals.Distance/1000.0, "km")
+	t.AddValueUnit("Daily Goal Met", totals.GoalsMetInDays, "days")
+	t.AddValueUnit("Active Days", totals.ActiveDays, "days")
+	t.AddValueUnit("Average Steps", totals.Steps/totals.ActiveDays, "steps")
+	t.AddValueUnit("Calories", totals.Calories, "kCal")
+
 	lastUsed, err := client.LastUsed(socialProfile.DisplayName)
 	bail(err)
 
