@@ -254,10 +254,9 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 			if err != nil {
 				return nil, err
 			}
+			c.dump(resp)
 		}
 	}
-
-	c.dump(resp)
 
 	c.debugLogger.Printf("Got HTTP status code %d in %s", resp.StatusCode, time.Since(t0).String())
 
