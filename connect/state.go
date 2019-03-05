@@ -11,13 +11,9 @@ import (
 	"github.com/abrander/garmin-connect"
 )
 
-var state struct {
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	SessionID string `json:"sessionID"`
-}
-
-var client *connect.Client
+var client = connect.NewClient(
+	connect.AutoRenewSession(true),
+)
 
 func stateFilename() string {
 	home, err := homedir.Dir()
@@ -29,32 +25,20 @@ func stateFilename() string {
 }
 
 func loadState() {
-	client = connect.NewClient(
-		connect.AutoRenewSession(true),
-	)
 	data, err := ioutil.ReadFile(stateFilename())
 	if err != nil {
 		log.Printf("Could not open state file: %s", err.Error())
 		return
 	}
 
-	err = json.Unmarshal(data, &state)
+	err = json.Unmarshal(data, client)
 	if err != nil {
 		log.Fatalf("Could not unmarshal state: %s", err.Error())
 	}
-
-	client.SetOptions(
-		connect.Credentials(state.Email, state.Password),
-		connect.SessionID(state.SessionID),
-	)
 }
 
 func storeState() {
-	if client != nil {
-		state.SessionID = client.SessionID()
-	}
-
-	b, err := json.MarshalIndent(state, "", "  ")
+	b, err := json.MarshalIndent(client, "", "  ")
 	if err != nil {
 		log.Fatalf("Could not marshal state: %s", err.Error())
 	}

@@ -76,20 +76,10 @@ func authenticate(_ *cobra.Command, _ []string) {
 	err = client.Authenticate()
 	bail(err)
 
-	state.Email = string(email)
-	state.Password = string(password)
-	state.SessionID = client.SessionID()
-
 	fmt.Printf("\nSuccess\n")
 }
 
 func signout(_ *cobra.Command, _ []string) {
 	client.Signout()
-
-	state.Email = ""
-	state.Password = ""
-	state.SessionID = ""
-	client = nil
-
-	storeState()
+	client.Password = ""
 }

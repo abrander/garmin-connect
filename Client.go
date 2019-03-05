@@ -46,10 +46,11 @@ const (
 
 // Client can be used to access the unofficial Garmin Connect API.
 type Client struct {
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	SessionID string `json:"sessionID"`
+
 	client           *http.Client
-	sessionid        *http.Cookie
-	login            string
-	password         string
 	autoRenewSession bool
 	debugLogger      Logger
 	dumpWriter       io.Writer
@@ -61,10 +62,7 @@ type Client struct {
 func SessionID(sessionID string) func(*Client) {
 	return func(c *Client) {
 		if sessionID != "" {
-			c.sessionid = &http.Cookie{
-				Value: sessionID,
-				Name:  sessionCookieName,
-			}
+			c.SessionID = sessionID
 		}
 	}
 }
@@ -72,8 +70,8 @@ func SessionID(sessionID string) func(*Client) {
 // Credentials can be used to pass login credentials to NewClient.
 func Credentials(email string, password string) func(*Client) {
 	return func(c *Client) {
-		c.login = email
-		c.password = password
+		c.Email = email
+		c.Password = password
 	}
 }
 
@@ -126,15 +124,6 @@ func (c *Client) SetOptions(options ...func(*Client)) {
 	}
 }
 
-// SessionID returns the current known session ID.
-func (c *Client) SessionID() string {
-	if c.sessionid != nil {
-		return c.sessionid.Value
-	}
-
-	return ""
-}
-
 func (c *Client) dump(reqResp interface{}) {
 	if c.dumpWriter == nil {
 		return
@@ -155,6 +144,13 @@ func (c *Client) dump(reqResp interface{}) {
 	c.dumpWriter.Write(dump)
 }
 
+func (c *Client) cookie() *http.Cookie {
+	return &http.Cookie{
+		Value: c.SessionID,
+		Name:  sessionCookieName,
+	}
+}
+
 func (c *Client) newRequest(method string, url string, body io.Reader) (*http.Request, error) {
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
@@ -165,8 +161,8 @@ func (c *Client) newRequest(method string, url string, body io.Reader) (*http.Re
 	req.Header.Set("User-Agent", "github.com/abrander/garmin-connect")
 
 	// If sessionid is known, add the cookie.
-	if c.sessionid != nil {
-		req.AddCookie(c.sessionid)
+	if c.SessionID != "" {
+		req.AddCookie(c.cookie())
 	}
 
 	return req, nil
@@ -233,7 +229,7 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 			c.debugLogger.Printf("Session invalid, requesting new session")
 
 			// Wups. Our session got invalidated.
-			c.sessionid = nil
+			c.SessionID = ""
 
 			// Re-new session.
 			err = c.Authenticate()
@@ -241,11 +237,11 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 				return nil, err
 			}
 
-			c.debugLogger.Printf("Successfully authenticated as %s", c.login)
+			c.debugLogger.Printf("Successfully authenticated as %s", c.Email)
 
 			// Replace the cookie ned newRequest with the new sessionid.
 			req.Header.Del("Cookie")
-			req.AddCookie(c.sessionid)
+			req.AddCookie(c.cookie())
 
 			c.debugLogger.Printf("Replaying %s request to %s", req.Method, req.URL.String())
 
@@ -301,7 +297,7 @@ func (c *Client) download(URL string, w io.Writer) error {
 }
 
 func (c *Client) authenticated() bool {
-	return c.sessionid != nil
+	return c.SessionID != ""
 }
 
 // Authenticate using a Garmin Connect username and password provided by
@@ -311,7 +307,7 @@ func (c *Client) Authenticate() error {
 	// called from do() upon session renewal.
 	URL := "https://sso.garmin.com/sso/signin?service=https%3A%2F%2Fconnect.garmin.com%2Fmodern%2F"
 
-	if c.login == "" || c.password == "" {
+	if c.Email == "" || c.Password == "" {
 		return ErrNoCredentials
 	}
 
@@ -319,8 +315,8 @@ func (c *Client) Authenticate() error {
 
 	// Get ticket from Garmin SSO.
 	resp, err := c.client.PostForm(URL, url.Values{
-		"username": {c.login},
-		"password": {c.password},
+		"username": {c.Email},
+		"password": {c.Password},
 		"embed":    {"false"},
 	})
 	if err != nil {
@@ -359,11 +355,11 @@ func (c *Client) Authenticate() error {
 		if cookie.Name == sessionCookieName {
 			c.debugLogger.Printf("Found session cookie with value %s", cookie.Value)
 
-			c.sessionid = cookie
+			c.SessionID = cookie.Value
 		}
 	}
 
-	if c.sessionid == nil {
+	if c.SessionID == "" {
 		c.debugLogger.Printf("No sessionid found")
 
 		return ErrWrongCredentials
@@ -398,18 +394,18 @@ func (c *Client) Signout() error {
 		return err
 	}
 
-	if c.sessionid == nil {
+	if c.SessionID == "" {
 		return nil
 	}
 
-	req.AddCookie(c.sessionid)
+	req.AddCookie(c.cookie())
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	c.sessionid = nil
+	c.SessionID = ""
 
 	return nil
 }
