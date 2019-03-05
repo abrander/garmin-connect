@@ -29,6 +29,13 @@ func init() {
 	}
 	weightCmd.AddCommand(weightAddCmd)
 
+	weightDeleteCmd := &cobra.Command{
+		Use:  "delete [yyyy-mm-dd]",
+		Run:  weightDelete,
+		Args: cobra.ExactArgs(1),
+	}
+	weightCmd.AddCommand(weightDeleteCmd)
+
 	weightDateCmd := &cobra.Command{
 		Use:  "date [yyyy-mm-dd]",
 		Run:  weightDate,
@@ -67,6 +74,14 @@ func weightAdd(_ *cobra.Command, args []string) {
 	bail(err)
 
 	err = client.AddUserWeight(date.Time(), float64(weight))
+	bail(err)
+}
+
+func weightDelete(_ *cobra.Command, args []string) {
+	date, err := connect.ParseDate(args[0])
+	bail(err)
+
+	err = client.DeleteWeightin(date.Time())
 	bail(err)
 }
 
