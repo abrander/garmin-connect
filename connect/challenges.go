@@ -21,6 +21,13 @@ func init() {
 	}
 	challengesCmd.AddCommand(challengesListCmd)
 
+	challengesListPreviousCmd := &cobra.Command{
+		Use:  "previous",
+		Run:  challengesListPrevious,
+		Args: cobra.ExactArgs(0),
+	}
+	challengesListCmd.AddCommand(challengesListPreviousCmd)
+
 	challengesViewCmd := &cobra.Command{
 		Use:  "view [id]",
 		Run:  challengesView,
@@ -31,6 +38,18 @@ func init() {
 
 func challengesList(_ *cobra.Command, args []string) {
 	challenges, err := client.AdhocChallenges()
+	bail(err)
+
+	t := NewTable()
+	t.AddHeader("ID", "Start", "End", "Description", "Name", "Rank")
+	for _, c := range challenges {
+		t.AddRow(c.UUID, c.Start.String(), c.End.String(), c.Description, c.Name, strconv.Itoa(c.UserRanking))
+	}
+	t.Output(os.Stdout)
+}
+
+func challengesListPrevious(_ *cobra.Command, args []string) {
+	challenges, err := client.HistoricalAdhocChallenges()
 	bail(err)
 
 	t := NewTable()
