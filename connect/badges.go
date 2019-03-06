@@ -10,6 +10,8 @@ import (
 	"github.com/abrander/garmin-connect"
 )
 
+const gotIt = "✓"
+
 func init() {
 	badgesCmd := &cobra.Command{
 		Use: "badges",
@@ -28,6 +30,13 @@ func init() {
 		Args: cobra.RangeArgs(0, 1),
 	}
 	badgesCmd.AddCommand(badgesEarnedCmd)
+
+	badgesViewCmd := &cobra.Command{
+		Use:  "view",
+		Run:  badgesView,
+		Args: cobra.ExactArgs(1),
+	}
+	badgesCmd.AddCommand(badgesViewCmd)
 
 	badgesCompareCmd := &cobra.Command{
 		Use:  "compare [displayName]",
@@ -72,6 +81,48 @@ func badgesEarned(_ *cobra.Command, args []string) {
 		t.AddRow(badge.Name, fmt.Sprintf("%d x%d", badge.Points, badge.EarnedNumber), badge.EarnedDate.String())
 	}
 	t.Output(os.Stdout)
+}
+
+func badgesView(_ *cobra.Command, args []string) {
+	badgeID, err := strconv.Atoi(args[0])
+	bail(err)
+
+	badge, err := client.BadgeDetail(badgeID)
+	bail(err)
+
+	t := NewTabular()
+	t.AddValue("ID", badge.ID)
+	t.AddValue("Key", badge.Key)
+	t.AddValue("Name", badge.Name)
+	t.AddValue("Points", badge.Points)
+	t.AddValue("Earned", formatDate(badge.EarnedDate.Time))
+	t.AddValueUnit("Earned", badge.EarnedNumber, "time(s)")
+	t.Output(os.Stdout)
+
+	if len(badge.Connections) > 0 {
+		fmt.Printf("\n  Connections with badge:\n")
+		t := NewTable()
+		t.AddHeader("Display Name", "Name", "Earned")
+		for _, b := range badge.Connections {
+			t.AddRow(b.DisplayName, b.FullName, formatDate(b.EarnedDate.Time))
+		}
+		t.Output(os.Stdout)
+	}
+
+	if len(badge.RelatedBadges) > 0 {
+		fmt.Printf("\n  Relates badges:\n")
+
+		t := NewTable()
+		t.AddHeader("ID", "Key", "Name", "Points", "Earned")
+		for _, b := range badge.RelatedBadges {
+			earned := ""
+			if b.EarnedByMe {
+				earned = gotIt
+			}
+			t.AddRow(strconv.Itoa(b.ID), b.Key, b.Name, strconv.Itoa(b.Points), earned)
+		}
+		t.Output(os.Stdout)
+	}
 }
 
 func badgesCompare(_ *cobra.Command, args []string) {
@@ -121,14 +172,14 @@ func badgesCompare(_ *cobra.Command, args []string) {
 		var me string
 		var other string
 		if e.me {
-			me = "✓"
+			me = gotIt
 			if e.meEarned > 1 {
 				me += fmt.Sprintf(" %dx", e.meEarned)
 			}
 		}
 
 		if e.other {
-			other = "✓"
+			other = gotIt
 			if e.otherEarned > 1 {
 				other += fmt.Sprintf(" %dx", e.otherEarned)
 			}
