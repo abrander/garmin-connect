@@ -56,3 +56,21 @@ func (c *Client) BadgeCompare(displayName string) (*BadgeStatus, *BadgeStatus, e
 
 	return proxy.User, proxy.Connection, nil
 }
+
+// BadgesEarned will return the list of badges earned by the curently
+// authenticated user.
+func (c *Client) BadgesEarned() ([]Badge, error) {
+	URL := "https://connect.garmin.com/modern/proxy/badge-service/badge/earned"
+
+	if !c.authenticated() {
+		return nil, ErrNotAuthenticated
+	}
+
+	badges := make([]Badge, 0, 200)
+	err := c.getJSON(URL, &badges)
+	if err != nil {
+		return nil, err
+	}
+
+	return badges, nil
+}
