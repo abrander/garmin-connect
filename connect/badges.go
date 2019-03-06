@@ -31,6 +31,13 @@ func init() {
 	}
 	badgesCmd.AddCommand(badgesEarnedCmd)
 
+	badgesAvailableCmd := &cobra.Command{
+		Use:  "available",
+		Run:  badgesAvailable,
+		Args: cobra.ExactArgs(0),
+	}
+	badgesCmd.AddCommand(badgesAvailableCmd)
+
 	badgesViewCmd := &cobra.Command{
 		Use:  "view",
 		Run:  badgesView,
@@ -79,6 +86,18 @@ func badgesEarned(_ *cobra.Command, args []string) {
 	t.AddHeader("Badge", "Points", "Date")
 	for _, badge := range badges {
 		t.AddRow(badge.Name, fmt.Sprintf("%d x%d", badge.Points, badge.EarnedNumber), badge.EarnedDate.String())
+	}
+	t.Output(os.Stdout)
+}
+
+func badgesAvailable(_ *cobra.Command, _ []string) {
+	badges, err := client.BadgesAvailable()
+	bail(err)
+
+	t := NewTable()
+	t.AddHeader("ID", "Key", "Name", "Points")
+	for _, badge := range badges {
+		t.AddRow(strconv.Itoa(badge.ID), badge.Key, badge.Name, strconv.Itoa(badge.Points))
 	}
 	t.Output(os.Stdout)
 }
