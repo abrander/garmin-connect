@@ -11,9 +11,17 @@ import (
 	"github.com/abrander/garmin-connect"
 )
 
-var client = connect.NewClient(
-	connect.AutoRenewSession(true),
+var (
+	client = connect.NewClient(
+		connect.AutoRenewSession(true),
+	)
+
+	stateFile string
 )
+
+func init() {
+	rootCmd.PersistentFlags().StringVarP(&stateFile, "state", "s", stateFilename(), "State file to use")
+}
 
 func stateFilename() string {
 	home, err := homedir.Dir()
@@ -25,7 +33,7 @@ func stateFilename() string {
 }
 
 func loadState() {
-	data, err := ioutil.ReadFile(stateFilename())
+	data, err := ioutil.ReadFile(stateFile)
 	if err != nil {
 		log.Printf("Could not open state file: %s", err.Error())
 		return
@@ -43,7 +51,7 @@ func storeState() {
 		log.Fatalf("Could not marshal state: %s", err.Error())
 	}
 
-	err = ioutil.WriteFile(stateFilename(), b, 0600)
+	err = ioutil.WriteFile(stateFile, b, 0600)
 	if err != nil {
 		log.Fatalf("Could not write state file: %s", err.Error())
 	}
