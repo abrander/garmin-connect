@@ -74,3 +74,21 @@ func (c *Client) BadgesEarned() ([]Badge, error) {
 
 	return badges, nil
 }
+
+// BadgesAvailable will return the list of badges not yet earned by the curently
+// authenticated user.
+func (c *Client) BadgesAvailable() ([]Badge, error) {
+	URL := "https://connect.garmin.com/modern/proxy/badge-service/badge/available"
+
+	if !c.authenticated() {
+		return nil, ErrNotAuthenticated
+	}
+
+	badges := make([]Badge, 0, 200)
+	err := c.getJSON(URL, &badges)
+	if err != nil {
+		return nil, err
+	}
+
+	return badges, nil
+}
