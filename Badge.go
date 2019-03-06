@@ -1,5 +1,9 @@
 package connect
 
+import (
+	"fmt"
+)
+
 // Badge describes a badge.
 type Badge struct {
 	ID                 int     `json:"badgeId"`
@@ -25,4 +29,31 @@ type Badge struct {
 	BadgeAssocDataID   string  `json:"badgeAssocDataId"`
 	BadgeAssocDataName string  `json:"badgeAssocDataName"`
 	EarnedByMe         bool    `json:"earnedByMe"`
+	RelatedBadges      []Badge `json:"relatedBadges"`
+	Connections        []Badge `json:"connections"`
+}
+
+// BadgeDetail will return details about a badge.
+func (c *Client) BadgeDetail(badgeID int) (*Badge, error) {
+	// Alternative URL:
+	// https://connect.garmin.com/modern/proxy/badge-service/badge/DISPLAYNAME/earned/detail/BADGEID
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/badge-service/badge/detail/v2/%d",
+		badgeID)
+
+	badge := new(Badge)
+
+	err := c.getJSON(URL, badge)
+
+	// This is interesting. Garmin returns 400 if an unknown badge is
+	// requested. We have no way of detecting that, so we silently changes
+	// the error to ErrNotFound.
+	if err == ErrBadRequest {
+		return nil, ErrNotFound
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return badge, nil
 }
