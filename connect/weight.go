@@ -22,6 +22,13 @@ func init() {
 	}
 	weightCmd.AddCommand(weightLatestCmd)
 
+	weightLatestWeekCmd := &cobra.Command{
+		Use:  "week",
+		Run:  weightLatestWeek,
+		Args: cobra.ExactArgs(0),
+	}
+	weightLatestCmd.AddCommand(weightLatestWeekCmd)
+
 	weightAddCmd := &cobra.Command{
 		Use:  "add [yyyy-mm-dd] [weight in grams]",
 		Run:  weightAdd,
@@ -64,6 +71,25 @@ func weightLatest(_ *cobra.Command, _ []string) {
 	t.AddValueUnit("Water", weightin.BodyWater, "%")
 	t.AddValueUnit("Bone Mass", float64(weightin.BoneMass)/1000.0, "kg")
 	t.AddValueUnit("Muscle Mass", float64(weightin.MuscleMass)/1000.0, "kg")
+	t.Output(os.Stdout)
+}
+
+func weightLatestWeek(_ *cobra.Command, _ []string) {
+	now := time.Now()
+	from := time.Now().Add(-24 * 6 * time.Hour)
+
+	average, _, err := client.Weightins(from, now)
+	bail(err)
+
+	t := NewTabular()
+	t.AddValue("Average from", formatDate(from))
+	t.AddValueUnit("Weight", average.Weight/1000.0, "kg")
+	t.AddValueUnit("BMI", average.BMI, "kg/m2")
+	t.AddValueUnit("Fat", average.BodyFatPercentage, "%")
+	t.AddValueUnit("Fat Mass", (average.Weight*average.BodyFatPercentage)/100000.0, "kg")
+	t.AddValueUnit("Water", average.BodyWater, "%")
+	t.AddValueUnit("Bone Mass", float64(average.BoneMass)/1000.0, "kg")
+	t.AddValueUnit("Muscle Mass", float64(average.MuscleMass)/1000.0, "kg")
 	t.Output(os.Stdout)
 }
 
