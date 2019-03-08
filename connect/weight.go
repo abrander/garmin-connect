@@ -60,6 +60,7 @@ func weightLatest(_ *cobra.Command, _ []string) {
 	t.AddValueUnit("Weight", weightin.Weight/1000.0, "kg")
 	t.AddValueUnit("BMI", weightin.BMI, "kg/m2")
 	t.AddValueUnit("Fat", weightin.BodyFatPercentage, "%")
+	t.AddValueUnit("Fat Mass", (weightin.Weight*weightin.BodyFatPercentage)/100000.0, "kg")
 	t.AddValueUnit("Water", weightin.BodyWater, "%")
 	t.AddValueUnit("Bone Mass", float64(weightin.BoneMass)/1000.0, "kg")
 	t.AddValueUnit("Muscle Mass", float64(weightin.MuscleMass)/1000.0, "kg")
@@ -119,6 +120,7 @@ func weightRange(_ *cobra.Command, args []string) {
 	t.AddValueUnit("Weight", average.Weight/1000.0, "kg")
 	t.AddValueUnit("BMI", average.BMI, "kg/m2")
 	t.AddValueUnit("Fat", average.BodyFatPercentage, "%")
+	t.AddValueUnit("Fat Mass", average.Weight*average.BodyFatPercentage/100000.0, "kg")
 	t.AddValueUnit("Water", average.BodyWater, "%")
 	t.AddValueUnit("Bone Mass", float64(average.BoneMass)/1000.0, "kg")
 	t.AddValueUnit("Muscle Mass", float64(average.MuscleMass)/1000.0, "kg")
@@ -126,7 +128,7 @@ func weightRange(_ *cobra.Command, args []string) {
 	t.Output(os.Stdout)
 
 	t2 := NewTable()
-	t2.AddHeader("Date", "Weight", "BMI", "Fat%", "Water%", "Bone Mass", "Muscle Mass")
+	t2.AddHeader("Date", "Weight", "BMI", "Fat%", "Fat", "Water%", "Bone Mass", "Muscle Mass")
 	for _, weightin := range weightins {
 		if weightin.Weight < 1.0 {
 			continue
@@ -137,6 +139,7 @@ func weightRange(_ *cobra.Command, args []string) {
 			fmt.Sprintf("%.1f", weightin.Weight/1000.0),
 			fmt.Sprintf("%.1f", weightin.BMI),
 			fmt.Sprintf("%.1f", weightin.BodyFatPercentage),
+			fmt.Sprintf("%.1f", weightin.Weight*weightin.BodyFatPercentage/100000.0),
 			fmt.Sprintf("%.1f", weightin.BodyWater),
 			fmt.Sprintf("%.1f", float64(weightin.BoneMass)/1000.0),
 			fmt.Sprintf("%.1f", float64(weightin.MuscleMass)/1000.0),
