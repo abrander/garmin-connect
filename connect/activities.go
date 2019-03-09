@@ -27,6 +27,13 @@ func init() {
 	}
 	activitiesCmd.AddCommand(activitiesListCmd)
 
+	activitiesViewCmd := &cobra.Command{
+		Use:  "view [activity id]",
+		Run:  activitiesView,
+		Args: cobra.ExactArgs(1),
+	}
+	activitiesCmd.AddCommand(activitiesViewCmd)
+
 	activitiesExportCmd := &cobra.Command{
 		Use:  "export",
 		Run:  activitiesExport,
@@ -70,6 +77,19 @@ func activitiesList(_ *cobra.Command, args []string) {
 			fmt.Sprintf("%.0f", a.Calories),
 		)
 	}
+	t.Output(os.Stdout)
+}
+
+func activitiesView(_ *cobra.Command, args []string) {
+	activityID, err := strconv.Atoi(args[0])
+	bail(err)
+
+	activity, err := client.Activity(activityID)
+	bail(err)
+
+	t := NewTabular()
+	t.AddValue("ID", activity.ID)
+	t.AddValue("Name", activity.ActivityName)
 	t.Output(os.Stdout)
 }
 

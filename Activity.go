@@ -37,6 +37,22 @@ type ActivityType struct {
 	SortOrder    int    `json:"sortOrder"`
 }
 
+// Activity will retrieve details about an activity.
+func (c *Client) Activity(activityID int) (*Activity, error) {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/activity-service/activity/%d",
+		activityID,
+	)
+
+	activity := new(Activity)
+
+	err := c.getJSON(URL, &activity)
+	if err != nil {
+		return nil, err
+	}
+
+	return activity, nil
+}
+
 // Activities will list activities for displayName. If displayName is empty,
 // the authenticated user will be used.
 func (c *Client) Activities(displayName string, start int, limit int) ([]Activity, error) {
