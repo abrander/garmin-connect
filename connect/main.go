@@ -14,6 +14,8 @@ import (
 
 var (
 	rootCmd = &cobra.Command{
+		Use:   os.Args[0] + " [command]",
+		Short: "CLI Client for Garmin Connect",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			loadState()
 			if verbose {
