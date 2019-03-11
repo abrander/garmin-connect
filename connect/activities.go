@@ -22,8 +22,9 @@ func init() {
 	rootCmd.AddCommand(activitiesCmd)
 
 	activitiesListCmd := &cobra.Command{
-		Use: "list",
-		Run: activitiesList,
+		Use:  "list [display name]",
+		Run:  activitiesList,
+		Args: cobra.RangeArgs(0, 1),
 	}
 	activitiesCmd.AddCommand(activitiesListCmd)
 
@@ -59,6 +60,9 @@ func init() {
 
 func activitiesList(_ *cobra.Command, args []string) {
 	displayName := ""
+	if len(args) == 1 {
+		displayName = args[0]
+	}
 
 	activities, err := client.Activities(displayName, 0, 100)
 	bail(err)
