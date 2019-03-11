@@ -41,8 +41,9 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&dumpFile, "dump", "d", "", "File to dump requests and responses to")
 
 	authenticateCmd := &cobra.Command{
-		Use: "authenticate",
-		Run: authenticate,
+		Use:  "authenticate [email]",
+		Run:  authenticate,
+		Args: cobra.RangeArgs(0, 1),
 	}
 	rootCmd.AddCommand(authenticateCmd)
 
@@ -63,10 +64,15 @@ func main() {
 	bail(rootCmd.Execute())
 }
 
-func authenticate(_ *cobra.Command, _ []string) {
+func authenticate(_ *cobra.Command, args []string) {
 	var email string
-	fmt.Print("Email: ")
-	fmt.Scanln(&email)
+	if len(args) == 1 {
+		email = args[0]
+	} else {
+		fmt.Print("Email: ")
+		fmt.Scanln(&email)
+	}
+
 	fmt.Print("Password: ")
 
 	password, err := terminal.ReadPassword(int(syscall.Stdin))
