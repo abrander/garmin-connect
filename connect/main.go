@@ -41,15 +41,18 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&dumpFile, "dump", "d", "", "File to dump requests and responses to")
 
 	authenticateCmd := &cobra.Command{
-		Use:  "authenticate [email]",
-		Run:  authenticate,
-		Args: cobra.RangeArgs(0, 1),
+		Use:   "authenticate [email]",
+		Short: "Authenticate against the Garmin API",
+		Run:   authenticate,
+		Args:  cobra.RangeArgs(0, 1),
 	}
 	rootCmd.AddCommand(authenticateCmd)
 
 	signoutCmd := &cobra.Command{
-		Use: "signout",
-		Run: signout,
+		Use:   "signout",
+		Short: "Log out of the Garmin API and forget session and password",
+		Run:   signout,
+		Args:  cobra.NoArgs,
 	}
 	rootCmd.AddCommand(signoutCmd)
 }

@@ -14,43 +14,50 @@ func init() {
 	rootCmd.AddCommand(connectionsCmd)
 
 	connectionsListCmd := &cobra.Command{
-		Use:  "list",
-		Run:  connectionsList,
-		Args: cobra.RangeArgs(0, 1),
+		Use:   "list [display name]",
+		Short: "List all connections",
+		Run:   connectionsList,
+		Args:  cobra.RangeArgs(0, 1),
 	}
 	connectionsCmd.AddCommand(connectionsListCmd)
 
 	connectionsPendingCmd := &cobra.Command{
-		Use: "pending",
-		Run: connectionsPending,
+		Use:   "pending",
+		Short: "List pending connections",
+		Run:   connectionsPending,
+		Args:  cobra.NoArgs,
 	}
 	connectionsCmd.AddCommand(connectionsPendingCmd)
 
 	connectionsRemoveCmd := &cobra.Command{
-		Use:  "remove",
-		Run:  connectionsRemove,
-		Args: cobra.ExactArgs(1),
+		Use:   "remove <display name>",
+		Short: "Remove a connection",
+		Run:   connectionsRemove,
+		Args:  cobra.ExactArgs(1),
 	}
 	connectionsCmd.AddCommand(connectionsRemoveCmd)
 
 	connectionsSearchCmd := &cobra.Command{
-		Use:  "search",
-		Run:  connectionsSearch,
-		Args: cobra.ExactArgs(1),
+		Use:   "search <keyword>",
+		Short: "Search Garmin wide for a person",
+		Run:   connectionsSearch,
+		Args:  cobra.ExactArgs(1),
 	}
 	connectionsCmd.AddCommand(connectionsSearchCmd)
 
 	connectionsAcceptCmd := &cobra.Command{
-		Use:  "accept",
-		Run:  connectionsAccept,
-		Args: cobra.ExactArgs(1),
+		Use:   "accept <request id>",
+		Short: "Accept a connection request",
+		Run:   connectionsAccept,
+		Args:  cobra.ExactArgs(1),
 	}
 	connectionsCmd.AddCommand(connectionsAcceptCmd)
 
 	connectionsRequestCmd := &cobra.Command{
-		Use:  "request",
-		Run:  connectionsRequest,
-		Args: cobra.ExactArgs(1),
+		Use:   "request <display name>",
+		Short: "Request connectio from another user",
+		Run:   connectionsRequest,
+		Args:  cobra.ExactArgs(1),
 	}
 	connectionsCmd.AddCommand(connectionsRequestCmd)
 }

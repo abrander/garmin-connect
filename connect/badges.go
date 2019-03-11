@@ -19,36 +19,42 @@ func init() {
 	rootCmd.AddCommand(badgesCmd)
 
 	badgesLeaderboardCmd := &cobra.Command{
-		Use: "leaderboard",
-		Run: badgesLeaderboard,
+		Use:   "leaderboard",
+		Short: "Show the current points leaderbaord among the authenticated users connections",
+		Run:   badgesLeaderboard,
+		Args:  cobra.NoArgs,
 	}
 	badgesCmd.AddCommand(badgesLeaderboardCmd)
 
 	badgesEarnedCmd := &cobra.Command{
-		Use:  "earned",
-		Run:  badgesEarned,
-		Args: cobra.RangeArgs(0, 1),
+		Use:   "earned [display name]",
+		Short: "Show the earned badges",
+		Run:   badgesEarned,
+		Args:  cobra.RangeArgs(0, 1),
 	}
 	badgesCmd.AddCommand(badgesEarnedCmd)
 
 	badgesAvailableCmd := &cobra.Command{
-		Use:  "available",
-		Run:  badgesAvailable,
-		Args: cobra.ExactArgs(0),
+		Use:   "available",
+		Short: "Show badges not yet earned",
+		Run:   badgesAvailable,
+		Args:  cobra.NoArgs,
 	}
 	badgesCmd.AddCommand(badgesAvailableCmd)
 
 	badgesViewCmd := &cobra.Command{
-		Use:  "view",
-		Run:  badgesView,
-		Args: cobra.ExactArgs(1),
+		Use:   "view <badge id>",
+		Short: "Show details about a badge",
+		Run:   badgesView,
+		Args:  cobra.ExactArgs(1),
 	}
 	badgesCmd.AddCommand(badgesViewCmd)
 
 	badgesCompareCmd := &cobra.Command{
-		Use:  "compare [displayName]",
-		Run:  badgesCompare,
-		Args: cobra.ExactArgs(1),
+		Use:   "compare <display name>",
+		Short: "Compare the authenticated users badges with the badges of another user",
+		Run:   badgesCompare,
+		Args:  cobra.ExactArgs(1),
 	}
 	badgesCmd.AddCommand(badgesCompareCmd)
 }

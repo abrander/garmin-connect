@@ -15,23 +15,26 @@ func init() {
 	rootCmd.AddCommand(challengesCmd)
 
 	challengesListCmd := &cobra.Command{
-		Use:  "list",
-		Run:  challengesList,
-		Args: cobra.ExactArgs(0),
+		Use:   "list",
+		Short: "List ad-hoc challenges",
+		Run:   challengesList,
+		Args:  cobra.NoArgs,
 	}
 	challengesCmd.AddCommand(challengesListCmd)
 
 	challengesListPreviousCmd := &cobra.Command{
-		Use:  "previous",
-		Run:  challengesListPrevious,
-		Args: cobra.ExactArgs(0),
+		Use:   "previous",
+		Short: "Show completed ad-hoc challenges",
+		Run:   challengesListPrevious,
+		Args:  cobra.NoArgs,
 	}
 	challengesListCmd.AddCommand(challengesListPreviousCmd)
 
 	challengesViewCmd := &cobra.Command{
-		Use:  "view [id]",
-		Run:  challengesView,
-		Args: cobra.ExactArgs(1),
+		Use:   "view <id>",
+		Short: "View challenge details",
+		Run:   challengesView,
+		Args:  cobra.ExactArgs(1),
 	}
 	challengesCmd.AddCommand(challengesViewCmd)
 }

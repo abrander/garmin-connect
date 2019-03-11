@@ -17,43 +17,50 @@ func init() {
 	rootCmd.AddCommand(weightCmd)
 
 	weightLatestCmd := &cobra.Command{
-		Use: "latest",
-		Run: weightLatest,
+		Use:   "latest",
+		Short: "Show the latest weight-in",
+		Run:   weightLatest,
+		Args:  cobra.NoArgs,
 	}
 	weightCmd.AddCommand(weightLatestCmd)
 
 	weightLatestWeekCmd := &cobra.Command{
-		Use:  "week",
-		Run:  weightLatestWeek,
-		Args: cobra.ExactArgs(0),
+		Use:   "week",
+		Short: "Show average weight for the latest week",
+		Run:   weightLatestWeek,
+		Args:  cobra.NoArgs,
 	}
 	weightLatestCmd.AddCommand(weightLatestWeekCmd)
 
 	weightAddCmd := &cobra.Command{
-		Use:  "add [yyyy-mm-dd] [weight in grams]",
-		Run:  weightAdd,
-		Args: cobra.ExactArgs(2),
+		Use:   "add <yyyy-mm-dd> <weight in grams>",
+		Short: "Add a simple weight for a specific date",
+		Run:   weightAdd,
+		Args:  cobra.ExactArgs(2),
 	}
 	weightCmd.AddCommand(weightAddCmd)
 
 	weightDeleteCmd := &cobra.Command{
-		Use:  "delete [yyyy-mm-dd]",
-		Run:  weightDelete,
-		Args: cobra.ExactArgs(1),
+		Use:   "delete <yyyy-mm-dd]>",
+		Short: "Delete a weight-in",
+		Run:   weightDelete,
+		Args:  cobra.ExactArgs(1),
 	}
 	weightCmd.AddCommand(weightDeleteCmd)
 
 	weightDateCmd := &cobra.Command{
-		Use:  "date [yyyy-mm-dd]",
-		Run:  weightDate,
-		Args: cobra.ExactArgs(1),
+		Use:   "date [yyyy-mm-dd]",
+		Short: "Show weight for a specific date",
+		Run:   weightDate,
+		Args:  cobra.ExactArgs(1),
 	}
 	weightCmd.AddCommand(weightDateCmd)
 
 	weightRangeCmd := &cobra.Command{
-		Use:  "range [yyyy-mm-dd] [yyyy-mm-dd]",
-		Run:  weightRange,
-		Args: cobra.ExactArgs(2),
+		Use:   "range [yyyy-mm-dd] [yyyy-mm-dd]",
+		Short: "Show weight for a date range",
+		Run:   weightRange,
+		Args:  cobra.ExactArgs(2),
 	}
 	weightCmd.AddCommand(weightRangeCmd)
 }

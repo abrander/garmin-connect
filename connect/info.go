@@ -9,9 +9,10 @@ import (
 
 func init() {
 	infoCmd := &cobra.Command{
-		Use:  "info",
-		Run:  info,
-		Args: cobra.RangeArgs(0, 1),
+		Use:   "info [display name]",
+		Short: "Show various information and statistics about a Connect User",
+		Run:   info,
+		Args:  cobra.RangeArgs(0, 1),
 	}
 	rootCmd.AddCommand(infoCmd)
 }

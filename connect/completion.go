@@ -13,14 +13,18 @@ func init() {
 	rootCmd.AddCommand(completionCmd)
 
 	completionBashCmd := &cobra.Command{
-		Use: "bash",
-		Run: completionBash,
+		Use:   "bash",
+		Short: "Output command completion for Bourne Again Shell (bash)",
+		Run:   completionBash,
+		Args:  cobra.NoArgs,
 	}
 	completionCmd.AddCommand(completionBashCmd)
 
 	completionZshCmd := &cobra.Command{
-		Use: "zsh",
-		Run: completionZsh,
+		Use:   "zsh",
+		Short: "Output command completion for Z Shell (zsh)",
+		Run:   completionZsh,
+		Args:  cobra.NoArgs,
 	}
 	completionCmd.AddCommand(completionZshCmd)
 }

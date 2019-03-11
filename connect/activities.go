@@ -22,38 +22,43 @@ func init() {
 	rootCmd.AddCommand(activitiesCmd)
 
 	activitiesListCmd := &cobra.Command{
-		Use:  "list [display name]",
-		Run:  activitiesList,
-		Args: cobra.RangeArgs(0, 1),
+		Use:   "list [display name]",
+		Short: "List Actvities",
+		Run:   activitiesList,
+		Args:  cobra.RangeArgs(0, 1),
 	}
 	activitiesCmd.AddCommand(activitiesListCmd)
 
 	activitiesViewCmd := &cobra.Command{
-		Use:  "view [activity id]",
-		Run:  activitiesView,
-		Args: cobra.ExactArgs(1),
+		Use:   "view <activity id>",
+		Short: "View details for an activity",
+		Run:   activitiesView,
+		Args:  cobra.ExactArgs(1),
 	}
 	activitiesCmd.AddCommand(activitiesViewCmd)
 
 	activitiesExportCmd := &cobra.Command{
-		Use:  "export",
-		Run:  activitiesExport,
-		Args: cobra.ExactArgs(1),
+		Use:   "export <activity id>",
+		Short: "Export an activity to a file",
+		Run:   activitiesExport,
+		Args:  cobra.ExactArgs(1),
 	}
-	activitiesExportCmd.Flags().StringVarP(&exportFormat, "format", "f", "fit", "Format of export (fit (default), tcx, gpx, kml, csv)")
+	activitiesExportCmd.Flags().StringVarP(&exportFormat, "format", "f", "fit", "Format of export (fit, tcx, gpx, kml, csv)")
 	activitiesCmd.AddCommand(activitiesExportCmd)
 
 	activitiesDeleteCmd := &cobra.Command{
-		Use:  "delete",
-		Run:  activitiesDelete,
-		Args: cobra.ExactArgs(1),
+		Use:   "delete <activity id>",
+		Short: "Delete an activity",
+		Run:   activitiesDelete,
+		Args:  cobra.ExactArgs(1),
 	}
 	activitiesCmd.AddCommand(activitiesDeleteCmd)
 
 	activitiesRenameCmd := &cobra.Command{
-		Use:  "rename",
-		Run:  activitiesRename,
-		Args: cobra.ExactArgs(2),
+		Use:   "rename <activity id> <new name>",
+		Short: "Rename an activity",
+		Run:   activitiesRename,
+		Args:  cobra.ExactArgs(2),
 	}
 	activitiesCmd.AddCommand(activitiesRenameCmd)
 }
