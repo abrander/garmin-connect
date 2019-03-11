@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"os"
 	"path"
-
-	"github.com/mitchellh/go-homedir"
 
 	"github.com/abrander/garmin-connect"
 )
@@ -24,7 +23,7 @@ func init() {
 }
 
 func stateFilename() string {
-	home, err := homedir.Dir()
+	home, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatalf("Could not detect home directory: %s", err.Error())
 	}
