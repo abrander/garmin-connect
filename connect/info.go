@@ -28,6 +28,7 @@ func info(_ *cobra.Command, args []string) {
 	socialProfile, err := client.SocialProfile(displayName)
 	bail(err)
 	t.AddValue("ID", socialProfile.ID)
+	t.AddValue("Profile ID", socialProfile.ProfileID)
 	t.AddValue("Display Name", socialProfile.DisplayName)
 	t.AddValue("Name", socialProfile.Fullname)
 	t.AddValue("Level", socialProfile.UserLevel)
