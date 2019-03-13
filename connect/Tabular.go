@@ -27,8 +27,12 @@ func (v Value) String() string {
 		str = strconv.Itoa(v.Value.(int))
 	case float64:
 		str = strconv.FormatFloat(v.Value.(float64), 'f', 1, 64)
+	case bool:
+		if v.Value.(bool) {
+			str = gotIt
+		}
 	default:
-		panic("no idea what to do")
+		panic(fmt.Sprintf("no idea what to do about %T:%v", v.Value, v.Value))
 	}
 	return "\033[1m" + str + "\033[0m " + v.Unit
 }
