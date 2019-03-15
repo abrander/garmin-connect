@@ -23,6 +23,7 @@ func (t *Time) UnmarshalJSON(value []byte) error {
 
 	// FIXME: Somehow we should deal with timezones :-/
 	layouts := []string{
+		"2006-01-02T15:04:05Z", // Support Gos own format.
 		"2006-01-02T15:04:05.0",
 		"2006-01-02 15:04:05",
 	}
@@ -44,4 +45,11 @@ func (t *Time) UnmarshalJSON(value []byte) error {
 	t.Time = proxy
 
 	return nil
+}
+
+// MarshalJSON implements json.Marshaler.
+func (t *Time) MarshalJSON() ([]byte, error) {
+	b, err := t.Time.MarshalJSON()
+
+	return b, err
 }
