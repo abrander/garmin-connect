@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/abrander/garmin-connect"
+	connect "github.com/abrander/garmin-connect"
 )
 
 var (
@@ -36,6 +36,14 @@ func init() {
 		Args:  cobra.ExactArgs(1),
 	}
 	activitiesCmd.AddCommand(activitiesViewCmd)
+
+	activitiesViewWeatherCmd := &cobra.Command{
+		Use:   "weather <activity id>",
+		Short: "View weather for an activity",
+		Run:   activitiesViewWeather,
+		Args:  cobra.ExactArgs(1),
+	}
+	activitiesViewCmd.AddCommand(activitiesViewWeatherCmd)
 
 	activitiesExportCmd := &cobra.Command{
 		Use:   "export <activity id>",
@@ -99,6 +107,25 @@ func activitiesView(_ *cobra.Command, args []string) {
 	t := NewTabular()
 	t.AddValue("ID", activity.ID)
 	t.AddValue("Name", activity.ActivityName)
+	t.Output(os.Stdout)
+}
+
+func activitiesViewWeather(_ *cobra.Command, args []string) {
+	activityID, err := strconv.Atoi(args[0])
+	bail(err)
+
+	weather, err := client.ActivityWeather(activityID)
+	bail(err)
+
+	t := NewTabular()
+	t.AddValueUnit("Temperature", weather.Temperature, "°F")
+	t.AddValueUnit("Apparent Temperature", weather.ApparentTemperature, "°F")
+	t.AddValueUnit("Dew Point", weather.DewPoint, "°F")
+	t.AddValueUnit("Relative Humidity", weather.RelativeHumidity, "%")
+	t.AddValueUnit("Wind Direction", weather.WindDirection, weather.WindDirectionCompassPoint)
+	t.AddValueUnit("Wind Speed", weather.WindSpeed, "mph")
+	t.AddValue("Latitude", weather.Latitude)
+	t.AddValue("Longitude", weather.Longitude)
 	t.Output(os.Stdout)
 }
 
