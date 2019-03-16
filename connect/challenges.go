@@ -22,6 +22,30 @@ func init() {
 	}
 	challengesCmd.AddCommand(challengesListCmd)
 
+	challengesListInvitesCmd := &cobra.Command{
+		Use:   "invites",
+		Short: "List ad-hoc challenge invites",
+		Run:   challengesListInvites,
+		Args:  cobra.NoArgs,
+	}
+	challengesListCmd.AddCommand(challengesListInvitesCmd)
+
+	challengesAcceptCmd := &cobra.Command{
+		Use:   "accept <invation ID>",
+		Short: "Accept an ad-hoc challenge",
+		Run:   challengesAccept,
+		Args:  cobra.ExactArgs(1),
+	}
+	challengesCmd.AddCommand(challengesAcceptCmd)
+
+	challengesDeclineCmd := &cobra.Command{
+		Use:   "decline <invation ID>",
+		Short: "Decline an ad-hoc challenge",
+		Run:   challengesDecline,
+		Args:  cobra.ExactArgs(1),
+	}
+	challengesCmd.AddCommand(challengesDeclineCmd)
+
 	challengesListPreviousCmd := &cobra.Command{
 		Use:   "previous",
 		Short: "Show completed ad-hoc challenges",
@@ -49,6 +73,34 @@ func challengesList(_ *cobra.Command, args []string) {
 		t.AddRow(c.UUID, c.Start.String(), c.End.String(), c.Description, c.Name, strconv.Itoa(c.UserRanking))
 	}
 	t.Output(os.Stdout)
+}
+
+func challengesListInvites(_ *cobra.Command, _ []string) {
+	challenges, err := client.AdhocChallengeInvites()
+	bail(err)
+
+	t := NewTable()
+	t.AddHeader("Invite ID", "Challenge ID", "Start", "End", "Description", "Name", "Rank")
+	for _, c := range challenges {
+		t.AddRow(strconv.Itoa(c.InviteID), c.UUID, c.Start.String(), c.End.String(), c.Description, c.Name, strconv.Itoa(c.UserRanking))
+	}
+	t.Output(os.Stdout)
+}
+
+func challengesAccept(_ *cobra.Command, args []string) {
+	inviteID, err := strconv.Atoi(args[0])
+	bail(err)
+
+	err = client.AdhocChallengeInvitationRespond(inviteID, true)
+	bail(err)
+}
+
+func challengesDecline(_ *cobra.Command, args []string) {
+	inviteID, err := strconv.Atoi(args[0])
+	bail(err)
+
+	err = client.AdhocChallengeInvitationRespond(inviteID, false)
+	bail(err)
 }
 
 func challengesListPrevious(_ *cobra.Command, args []string) {
