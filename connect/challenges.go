@@ -61,6 +61,22 @@ func init() {
 		Args:  cobra.ExactArgs(1),
 	}
 	challengesCmd.AddCommand(challengesViewCmd)
+
+	challengesLeaveCmd := &cobra.Command{
+		Use:   "leave <challenge id>",
+		Short: "Leave a challenge",
+		Run:   challengesLeave,
+		Args:  cobra.ExactArgs(1),
+	}
+	challengesCmd.AddCommand(challengesLeaveCmd)
+
+	challengesRemoveCmd := &cobra.Command{
+		Use:   "remove <challenge id> <user id>",
+		Short: "Remove a user from a challenge",
+		Run:   challengesRemove,
+		Args:  cobra.ExactArgs(2),
+	}
+	challengesCmd.AddCommand(challengesRemoveCmd)
 }
 
 func challengesList(_ *cobra.Command, args []string) {
@@ -113,6 +129,22 @@ func challengesListPrevious(_ *cobra.Command, args []string) {
 		t.AddRow(c.UUID, c.Start.String(), c.End.String(), c.Description, c.Name, strconv.Itoa(c.UserRanking))
 	}
 	t.Output(os.Stdout)
+}
+
+func challengesLeave(_ *cobra.Command, args []string) {
+	uuid := args[0]
+	err := client.LeaveAdhocChallenge(uuid, 0)
+	bail(err)
+}
+
+func challengesRemove(_ *cobra.Command, args []string) {
+	uuid := args[0]
+
+	profileID, err := strconv.Atoi(args[1])
+	bail(err)
+
+	err = client.LeaveAdhocChallenge(uuid, profileID)
+	bail(err)
 }
 
 func challengesView(_ *cobra.Command, args []string) {

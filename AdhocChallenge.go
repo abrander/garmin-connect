@@ -87,3 +87,34 @@ func (c *Client) AdhocChallenge(uuid string) (*AdhocChallenge, error) {
 
 	return challenge, nil
 }
+
+// LeaveAdhocChallenge will leave an ad-hoc challenge. If profileID is 0, the
+// currently authenticated user will be used.
+func (c *Client) LeaveAdhocChallenge(challengeUUID string, profileID int) error {
+	if profileID == 0 && c.Profile == nil {
+		return ErrNotAuthenticated
+	}
+
+	if profileID == 0 && c.Profile != nil {
+		profileID = c.Profile.ProfileID
+	}
+
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/adhocchallenge-service/adHocChallenge/%s/player/%d",
+		challengeUUID,
+		profileID,
+	)
+
+	req, err := c.newRequest("DELETE", URL, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.do(req)
+	if err != nil {
+		return err
+	}
+
+	resp.Body.Close()
+
+	return nil
+}
