@@ -64,7 +64,9 @@ func info(_ *cobra.Command, args []string) {
 	t.AddValueUnit("Distance", totals.Distance/1000.0, "km")
 	t.AddValueUnit("Daily Goal Met", totals.GoalsMetInDays, "days")
 	t.AddValueUnit("Active Days", totals.ActiveDays, "days")
-	t.AddValueUnit("Average Steps", totals.Steps/totals.ActiveDays, "steps")
+	if totals.ActiveDays > 0 {
+		t.AddValueUnit("Average Steps", totals.Steps/totals.ActiveDays, "steps")
+	}
 	t.AddValueUnit("Calories", totals.Calories, "kCal")
 
 	lastUsed, err := client.LastUsed(socialProfile.DisplayName)
