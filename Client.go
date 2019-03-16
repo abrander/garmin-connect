@@ -1,6 +1,7 @@
 package connect
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"io"
@@ -46,9 +47,10 @@ const (
 
 // Client can be used to access the unofficial Garmin Connect API.
 type Client struct {
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	SessionID string `json:"sessionID"`
+	Email     string         `json:"email"`
+	Password  string         `json:"password"`
+	SessionID string         `json:"sessionID"`
+	Profile   *SocialProfile `json:"socialProfile"`
 
 	client           *http.Client
 	autoRenewSession bool
@@ -375,9 +377,42 @@ func (c *Client) Authenticate() error {
 		return err
 	}
 	c.dump(resp)
+
+	c.Profile, err = extractSocialProfile(resp.Body)
+	if err != nil {
+		return err
+	}
+
 	resp.Body.Close()
 
 	return nil
+}
+
+// extractSocialProfile will try to extract the social profile from the HTML.
+// This is very fragile.
+func extractSocialProfile(body io.Reader) (*SocialProfile, error) {
+	scanner := bufio.NewScanner(body)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, "VIEWER_SOCIAL_PROFILE") {
+			line = strings.TrimSpace(line)
+			line = strings.Replace(line, "\\", "", -1)
+			line = strings.TrimPrefix(line, "window.VIEWER_SOCIAL_PROFILE = JSON.parse(\"")
+			line = strings.TrimSuffix(line, "\");")
+
+			profile := new(SocialProfile)
+
+			err := json.Unmarshal([]byte(line), profile)
+			if err != nil {
+				return nil, err
+			}
+
+			return profile, nil
+		}
+	}
+
+	return nil, errors.New("social profile not found in HTML")
 }
 
 // Signout will end the session with Garmin. If you use this for regular
