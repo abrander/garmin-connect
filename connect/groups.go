@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -28,6 +30,14 @@ func init() {
 		Args:  cobra.ExactArgs(1),
 	}
 	groupsCmd.AddCommand(groupsViewCmd)
+
+	groupsViewAnnouncementCmd := &cobra.Command{
+		Use:   "announcement <group id>",
+		Short: "View group abbouncement",
+		Run:   groupsViewAnnouncement,
+		Args:  cobra.ExactArgs(1),
+	}
+	groupsViewCmd.AddCommand(groupsViewAnnouncementCmd)
 
 	groupsSearchCmd := &cobra.Command{
 		Use:   "search <keyword>",
@@ -112,6 +122,23 @@ func groupsView(_ *cobra.Command, args []string) {
 	t.AddValue("CorporateWellness", group.CorporateWellness)
 	//	t.AddValue("ActivityFeedTypes", group.ActivityFeedTypes)
 	t.Output(os.Stdout)
+}
+
+func groupsViewAnnouncement(_ *cobra.Command, args []string) {
+	id, err := strconv.Atoi(args[0])
+	bail(err)
+
+	announcement, err := client.GroupAnnouncement(id)
+	bail(err)
+
+	t := NewTabular()
+	t.AddValue("ID", announcement.ID)
+	t.AddValue("GroupID", announcement.GroupID)
+	t.AddValue("Title", announcement.Title)
+	t.AddValue("ExpireDate", announcement.ExpireDate.String())
+	t.AddValue("AnnouncementDate", announcement.AnnouncementDate.String())
+	t.Output(os.Stdout)
+	fmt.Fprintf(os.Stdout, "\n%s\n", strings.TrimSpace(announcement.Message))
 }
 
 func groupsJoin(_ *cobra.Command, args []string) {
