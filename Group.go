@@ -42,8 +42,17 @@ Unknowns:
 "groupMemberCount": null,
 */
 
-// Groups will return the group membership.
+// Groups will return the group membership. If displayName is empty, the
+// currently authenticated user will be used.
 func (c *Client) Groups(displayName string) ([]Group, error) {
+	if displayName == "" && c.Profile == nil {
+		return nil, ErrNotAuthenticated
+	}
+
+	if displayName == "" && c.Profile != nil {
+		displayName = c.Profile.DisplayName
+	}
+
 	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/group-service/groups/%s", displayName)
 
 	groups := make([]Group, 0, 30)
@@ -107,11 +116,16 @@ func (c *Client) Group(groupID int) (*Group, error) {
 	return group, nil
 }
 
-// JoinGroup joins a group.
-func (c *Client) JoinGroup(profileID int, groupID int) error {
+// JoinGroup joins a group. If profileID is 0, the currently authenticated
+// user will be used.
+func (c *Client) JoinGroup(groupID int) error {
+	if c.Profile == nil {
+		return ErrNotAuthenticated
+	}
+
 	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/group-service/group/%d/member/%d",
 		groupID,
-		profileID,
+		c.Profile.ProfileID,
 	)
 
 	payload := struct {
@@ -121,7 +135,7 @@ func (c *Client) JoinGroup(profileID int, groupID int) error {
 	}{
 		groupID,
 		nil,
-		profileID,
+		c.Profile.ProfileID,
 	}
 
 	body := bytes.NewBuffer(nil)
@@ -153,10 +167,14 @@ func (c *Client) JoinGroup(profileID int, groupID int) error {
 }
 
 // LeaveGroup leaves a group.
-func (c *Client) LeaveGroup(profileID int, groupID int) error {
+func (c *Client) LeaveGroup(groupID int) error {
+	if c.Profile == nil {
+		return ErrNotAuthenticated
+	}
+
 	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/group-service/group/%d/member/%d",
 		groupID,
-		profileID,
+		c.Profile.ProfileID,
 	)
 
 	req, err := c.newRequest("DELETE", URL, nil)

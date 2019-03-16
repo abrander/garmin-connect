@@ -56,18 +56,18 @@ func init() {
 	groupsCmd.AddCommand(groupsSearchCmd)
 
 	groupsJoinCmd := &cobra.Command{
-		Use:   "join <profile id> <group id>",
+		Use:   "join <group id>",
 		Short: "Join a group",
 		Run:   groupsJoin,
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 	}
 	groupsCmd.AddCommand(groupsJoinCmd)
 
 	groupsLeaveCmd := &cobra.Command{
-		Use:   "leave <profile id> <group id>",
+		Use:   "leave <group id>",
 		Short: "Leave a group",
 		Run:   groupsLeave,
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 	}
 	groupsCmd.AddCommand(groupsLeaveCmd)
 }
@@ -165,23 +165,17 @@ func groupsViewMembers(_ *cobra.Command, args []string) {
 }
 
 func groupsJoin(_ *cobra.Command, args []string) {
-	profileID, err := strconv.Atoi(args[0])
+	groupID, err := strconv.Atoi(args[0])
 	bail(err)
 
-	groupID, err := strconv.Atoi(args[1])
-	bail(err)
-
-	err = client.JoinGroup(profileID, groupID)
+	err = client.JoinGroup(groupID)
 	bail(err)
 }
 
 func groupsLeave(_ *cobra.Command, args []string) {
-	profileID, err := strconv.Atoi(args[0])
+	groupID, err := strconv.Atoi(args[0])
 	bail(err)
 
-	groupID, err := strconv.Atoi(args[1])
-	bail(err)
-
-	err = client.LeaveGroup(profileID, groupID)
+	err = client.LeaveGroup(groupID)
 	bail(err)
 }
