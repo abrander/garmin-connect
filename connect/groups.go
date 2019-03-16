@@ -39,6 +39,14 @@ func init() {
 	}
 	groupsViewCmd.AddCommand(groupsViewAnnouncementCmd)
 
+	groupsViewMembersCmd := &cobra.Command{
+		Use:   "members <group id>",
+		Short: "View group members",
+		Run:   groupsViewMembers,
+		Args:  cobra.ExactArgs(1),
+	}
+	groupsViewCmd.AddCommand(groupsViewMembersCmd)
+
 	groupsSearchCmd := &cobra.Command{
 		Use:   "search <keyword>",
 		Short: "Search for a group",
@@ -139,6 +147,21 @@ func groupsViewAnnouncement(_ *cobra.Command, args []string) {
 	t.AddValue("AnnouncementDate", announcement.AnnouncementDate.String())
 	t.Output(os.Stdout)
 	fmt.Fprintf(os.Stdout, "\n%s\n", strings.TrimSpace(announcement.Message))
+}
+
+func groupsViewMembers(_ *cobra.Command, args []string) {
+	id, err := strconv.Atoi(args[0])
+	bail(err)
+
+	members, err := client.GroupMembers(id)
+	bail(err)
+
+	t := NewTable()
+	t.AddHeader("Display Name", "Joined", "Name", "Location", "Role", "Profile Image")
+	for _, m := range members {
+		t.AddRow(m.DisplayName, formatDate(m.Joined), m.Fullname, m.Location, m.Role, m.ProfileImageURLMedium)
+	}
+	t.Output(os.Stdout)
 }
 
 func groupsJoin(_ *cobra.Command, args []string) {
