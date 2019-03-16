@@ -15,7 +15,7 @@ type Time struct{ time.Time }
 func (t *Time) UnmarshalJSON(value []byte) error {
 	// Sometimes timestamps are transferred as milliseconds since epoch :-/
 	i, err := strconv.ParseInt(string(value), 10, 64)
-	if err == nil && i > 1500000000000 {
+	if err == nil && i > 1000000000000 {
 		t.Time = time.Unix(i/1000, 0)
 
 		return nil
