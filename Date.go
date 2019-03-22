@@ -21,6 +21,10 @@ func (d Date) Time() time.Time {
 
 // UnmarshalJSON implements json.Unmarshaler.
 func (d *Date) UnmarshalJSON(value []byte) error {
+	if string(value) == "null" {
+		return nil
+	}
+
 	// Sometimes dates are transferred as milliseconds since epoch :-/
 	i, err := strconv.ParseInt(string(value), 10, 64)
 	if err == nil {
@@ -57,6 +61,10 @@ func ParseDate(in string) (Date, error) {
 }
 
 // String implements Stringer.
-func (d *Date) String() string {
+func (d Date) String() string {
+	if d.Year == 0 && d.Month == 0 && d.DayOfMonth == 0 {
+		return "-"
+	}
+
 	return fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, d.DayOfMonth)
 }
