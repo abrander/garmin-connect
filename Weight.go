@@ -1,8 +1,6 @@
 package connect
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -76,19 +74,7 @@ func (c *Client) DeleteWeightin(date time.Time) error {
 		return ErrNotAuthenticated
 	}
 
-	req, err := c.newRequest("DELETE", URL, nil)
-	if err != nil {
-		return err
-	}
-
-	resp, err := c.do(req)
-	if err != nil {
-		return err
-	}
-
-	resp.Body.Close()
-
-	return nil
+	return c.write("DELETE", URL, nil, 204)
 }
 
 // AddUserWeight will add a manual weight in. weight is in grams to match
@@ -105,31 +91,7 @@ func (c *Client) AddUserWeight(date time.Time, weight float64) error {
 		Value:   weight / 1000.0,
 	}
 
-	body := bytes.NewBuffer(nil)
-	enc := json.NewEncoder(body)
-	err := enc.Encode(payload)
-	if err != nil {
-		return err
-	}
-
-	req, err := c.newRequest("POST", URL, body)
-	if err != nil {
-		return err
-	}
-	req.Header.Add("nk", "NT") // Yep. This is needed. No idea what it does.
-	req.Header.Add("content-type", "application/json")
-
-	resp, err := c.do(req)
-	if err != nil {
-		return err
-	}
-	resp.Body.Close()
-
-	if resp.StatusCode != 204 {
-		return fmt.Errorf("HTTP call returned %d", resp.StatusCode)
-	}
-
-	return nil
+	return c.write("POST", URL, payload, 204)
 }
 
 // WeightByDate retrieves the weight of date if available. If no weight data

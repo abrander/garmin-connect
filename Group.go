@@ -1,10 +1,8 @@
 package connect
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/url"
 	"strings"
 )
@@ -138,32 +136,7 @@ func (c *Client) JoinGroup(groupID int) error {
 		c.Profile.ProfileID,
 	}
 
-	body := bytes.NewBuffer(nil)
-	enc := json.NewEncoder(body)
-	err := enc.Encode(payload)
-	if err != nil {
-		return err
-	}
-
-	req, err := c.newRequest("POST", URL, body)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("nk", "NT")
-	req.Header.Add("content-type", "application/json")
-
-	resp, err := c.do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Unexpected status code %d", resp.StatusCode)
-	}
-
-	return nil
+	return c.write("POST", URL, payload, 200)
 }
 
 // LeaveGroup leaves a group.
@@ -177,21 +150,5 @@ func (c *Client) LeaveGroup(groupID int) error {
 		c.Profile.ProfileID,
 	)
 
-	req, err := c.newRequest("DELETE", URL, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("nk", "NT")
-
-	resp, err := c.do(req)
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != 204 {
-		return fmt.Errorf("HTTP call returned %d", resp.StatusCode)
-	}
-
-	return nil
+	return c.write("DELETE", URL, nil, 204)
 }

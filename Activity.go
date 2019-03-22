@@ -1,8 +1,6 @@
 package connect
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -83,32 +81,7 @@ func (c *Client) RenameActivity(activityID int, newName string) error {
 		Name string `json:"activityName"`
 	}{activityID, newName}
 
-	body := bytes.NewBuffer(nil)
-	enc := json.NewEncoder(body)
-	err := enc.Encode(payload)
-	if err != nil {
-		return err
-	}
-
-	req, err := c.newRequest("PUT", URL, body)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("nk", "NT")
-	req.Header.Add("content-type", "application/json")
-
-	resp, err := c.do(req)
-	if err != nil {
-		return err
-	}
-	resp.Body.Close()
-
-	if resp.StatusCode != 204 {
-		return fmt.Errorf("HTTP call returned %d", resp.StatusCode)
-	}
-
-	return nil
+	return c.write("PUT", URL, payload, 204)
 }
 
 const (
@@ -153,16 +126,5 @@ func (c *Client) ExportActivity(id int, w io.Writer, format int) error {
 func (c *Client) DeleteActivity(id int) error {
 	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/activity-service/activity/%d", id)
 
-	req, err := c.newRequest("DELETE", URL, nil)
-	if err != nil {
-		return err
-	}
-
-	resp, err := c.do(req)
-	if err != nil {
-		return err
-	}
-	resp.Body.Close()
-
-	return nil
+	return c.write("DELETE", URL, nil, 0)
 }

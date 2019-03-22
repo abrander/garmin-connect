@@ -1,7 +1,6 @@
 package connect
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -58,27 +57,7 @@ func (c *Client) AcceptConnection(connectionRequestID int) error {
 		ConnectionRequestID: connectionRequestID,
 	}
 
-	body := bytes.NewBuffer(nil)
-	enc := json.NewEncoder(body)
-	err := enc.Encode(payload)
-	if err != nil {
-		return err
-	}
-
-	req, err := c.newRequest("PUT", URL, body)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("nk", "NT")
-	req.Header.Add("content-type", "application/json")
-
-	_, err = c.do(req)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return c.write("PUT", URL, payload, 0)
 }
 
 func (c *Client) SearchConnections(keyword string) ([]SocialProfile, error) {
@@ -121,30 +100,12 @@ func (c *Client) SearchConnections(keyword string) ([]SocialProfile, error) {
 func (c *Client) RemoveConnection(connectionRequestID int) error {
 	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/userprofile-service/connection/end/%d", connectionRequestID)
 
-	req, err := c.newRequest("PUT", URL, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("nk", "NT")
-
-	_, err = c.do(req)
-
-	return err
+	return c.write("PUT", URL, nil, 0)
 }
 
 // RequestConnection will request a connection with displayName.
 func (c *Client) RequestConnection(displayName string) error {
 	URL := "https://connect.garmin.com/modern/proxy/userprofile-service/connection/request/" + displayName
 
-	req, err := c.newRequest("PUT", URL, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("nk", "NT")
-
-	_, err = c.do(req)
-
-	return err
+	return c.write("PUT", URL, nil, 0)
 }

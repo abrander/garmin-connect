@@ -2,8 +2,10 @@ package connect
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -185,6 +187,46 @@ func (c *Client) getJSON(URL string, target interface{}) error {
 	decoder := json.NewDecoder(resp.Body)
 
 	return decoder.Decode(target)
+}
+
+// write is suited for writing stuff to the API when you're NOT expected any
+// data in return but a HTTP status code.
+func (c *Client) write(method string, URL string, payload interface{}, expectedStatus int) error {
+	var body io.Reader
+
+	if payload != nil {
+		b, err := json.Marshal(payload)
+		if err != nil {
+			return err
+		}
+
+		body = bytes.NewReader(b)
+	}
+
+	req, err := c.newRequest(method, URL, body)
+	if err != nil {
+		return err
+	}
+
+	// Yep. This is needed for writing to the API. No idea what it does.
+	req.Header.Add("nk", "NT")
+
+	// If we have a payload it is by definition JSON.
+	if payload != nil {
+		req.Header.Add("content-type", "application/json")
+	}
+
+	resp, err := c.do(req)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+
+	if expectedStatus > 0 && resp.StatusCode != expectedStatus {
+		return fmt.Errorf("HTTP %s returned %d (%d expected)", method, resp.StatusCode, expectedStatus)
+	}
+
+	return nil
 }
 
 func (c *Client) getString(URL string) (string, error) {

@@ -1,8 +1,6 @@
 package connect
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 )
 
@@ -61,25 +59,5 @@ func (c *Client) AdhocChallengeInvitationRespond(inviteID int, accept bool) erro
 		scope,
 	}
 
-	body := bytes.NewBuffer(nil)
-	enc := json.NewEncoder(body)
-	err := enc.Encode(payload)
-	if err != nil {
-		return err
-	}
-
-	req, err := c.newRequest("PUT", URL, body)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("nk", "NT")
-	req.Header.Add("content-type", "application/json")
-
-	_, err = c.do(req)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return c.write("PUT", URL, payload, 0)
 }

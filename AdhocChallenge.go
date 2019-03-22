@@ -104,17 +104,5 @@ func (c *Client) LeaveAdhocChallenge(challengeUUID string, profileID int) error 
 		profileID,
 	)
 
-	req, err := c.newRequest("DELETE", URL, nil)
-	if err != nil {
-		return err
-	}
-
-	resp, err := c.do(req)
-	if err != nil {
-		return err
-	}
-
-	resp.Body.Close()
-
-	return nil
+	return c.write("DELETE", URL, nil, 0)
 }
