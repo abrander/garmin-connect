@@ -120,3 +120,18 @@ func (c *Client) WeightByDate(date time.Time) (Time, float64, error) {
 
 	return proxy[0].TimeStamp, proxy[0].Weight, nil
 }
+
+// WeightGoal will list the users weight goal if any. If displayName is empty,
+// the currently authenticated user will be used.
+func (c *Client) WeightGoal(displayName string) (*Goal, error) {
+	goals, err := c.Goals(displayName, 4)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(goals) < 1 {
+		return nil, ErrNotFound
+	}
+
+	return &goals[0], nil
+}

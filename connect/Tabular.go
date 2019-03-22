@@ -5,6 +5,8 @@ import (
 	"io"
 	"strconv"
 	"unicode/utf8"
+
+	connect "github.com/abrander/garmin-connect"
 )
 
 type Tabular struct {
@@ -23,14 +25,16 @@ func (v Value) String() string {
 	switch v.Value.(type) {
 	case string:
 		str = v.Value.(string)
-	case int:
-		str = strconv.Itoa(v.Value.(int))
+	case int, int64:
+		str = fmt.Sprintf("%d", v.Value)
 	case float64:
 		str = strconv.FormatFloat(v.Value.(float64), 'f', 1, 64)
 	case bool:
 		if v.Value.(bool) {
 			str = gotIt
 		}
+	case connect.Date:
+		str = v.Value.(connect.Date).String()
 	default:
 		panic(fmt.Sprintf("no idea what to do about %T:%v", v.Value, v.Value))
 	}

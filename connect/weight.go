@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/abrander/garmin-connect"
+	connect "github.com/abrander/garmin-connect"
 	"github.com/spf13/cobra"
 )
 
@@ -63,6 +63,14 @@ func init() {
 		Args:  cobra.ExactArgs(2),
 	}
 	weightCmd.AddCommand(weightRangeCmd)
+
+	weightGoalCmd := &cobra.Command{
+		Use:   "goal [displayName]",
+		Short: "Show weight goal",
+		Run:   weightGoal,
+		Args:  cobra.RangeArgs(0, 1),
+	}
+	weightCmd.AddCommand(weightGoalCmd)
 }
 
 func weightLatest(_ *cobra.Command, _ []string) {
@@ -180,4 +188,21 @@ func weightRange(_ *cobra.Command, args []string) {
 	}
 	fmt.Fprintf(os.Stdout, "\n")
 	t2.Output(os.Stdout)
+}
+
+func weightGoal(_ *cobra.Command, args []string) {
+	displayName := ""
+
+	if len(args) > 0 {
+		displayName = args[0]
+	}
+
+	goal, err := client.WeightGoal(displayName)
+	bail(err)
+
+	t := NewTabular()
+	t.AddValue("ID", goal.ID)
+	t.AddValue("Created", goal.Created)
+	t.AddValueUnit("Target", float64(goal.Value)/1000.0, "kg")
+	t.Output(os.Stdout)
 }
