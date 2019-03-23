@@ -2,8 +2,8 @@ package connect
 
 // SocialProfile represents a Garmin Connect user.
 type SocialProfile struct {
-	ID                    int      `json:"id"`
-	ProfileID             int      `json:"profileId"`
+	ID                    int64    `json:"id"`
+	ProfileID             int64    `json:"profileId"`
 	ConnectionRequestID   int      `json:"connectionRequestId"`
 	GarminGUID            string   `json:"garminGUID"`
 	DisplayName           string   `json:"displayName"`

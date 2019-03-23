@@ -18,7 +18,7 @@ func (c *Client) GroupMembers(groupID int) ([]GroupMember, error) {
 	type proxy struct {
 		ID                    string `json:"id"`
 		GroupID               int    `json:"groupId"`
-		UserProfileID         int    `json:"userProfileId"`
+		UserProfileID         int64  `json:"userProfileId"`
 		DisplayName           string `json:"displayName"`
 		Location              string `json:"location"`
 		Joined                Date   `json:"joinDate"`

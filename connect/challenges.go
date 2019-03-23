@@ -140,7 +140,7 @@ func challengesLeave(_ *cobra.Command, args []string) {
 func challengesRemove(_ *cobra.Command, args []string) {
 	uuid := args[0]
 
-	profileID, err := strconv.Atoi(args[1])
+	profileID, err := strconv.ParseInt(args[1], 10, 64)
 	bail(err)
 
 	err = client.LeaveAdhocChallenge(uuid, profileID)

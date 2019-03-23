@@ -129,7 +129,7 @@ func (c *Client) JoinGroup(groupID int) error {
 	payload := struct {
 		GroupID   int     `json:"groupId"`
 		Role      *string `json:"groupRole"` // is always null?
-		ProfileID int     `json:"userProfileId"`
+		ProfileID int64   `json:"userProfileId"`
 	}{
 		groupID,
 		nil,

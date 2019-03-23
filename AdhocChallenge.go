@@ -90,7 +90,7 @@ func (c *Client) AdhocChallenge(uuid string) (*AdhocChallenge, error) {
 
 // LeaveAdhocChallenge will leave an ad-hoc challenge. If profileID is 0, the
 // currently authenticated user will be used.
-func (c *Client) LeaveAdhocChallenge(challengeUUID string, profileID int) error {
+func (c *Client) LeaveAdhocChallenge(challengeUUID string, profileID int64) error {
 	if profileID == 0 && c.Profile == nil {
 		return ErrNotAuthenticated
 	}
