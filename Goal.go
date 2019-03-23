@@ -74,3 +74,22 @@ func (c *Client) AddGoal(displayName string, goal Goal) error {
 
 	return c.write("POST", URL, goal, 204)
 }
+
+// DeleteGoal will delete an existing goal. If displayName is empty, the
+// currently authenticated user will be used.
+func (c *Client) DeleteGoal(displayName string, goalID int) error {
+	if displayName == "" && c.Profile == nil {
+		return ErrNotAuthenticated
+	}
+
+	if displayName == "" && c.Profile != nil {
+		displayName = c.Profile.DisplayName
+	}
+
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/wellness-service/wellness/wellness-goals/%d/%s",
+		goalID,
+		displayName,
+	)
+
+	return c.write("DELETE", URL, nil, 204)
+}
