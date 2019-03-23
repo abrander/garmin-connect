@@ -56,7 +56,7 @@ func (d Date) MarshalJSON() ([]byte, error) {
 		return []byte("null"), nil
 	}
 
-	return []byte(fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, d.DayOfMonth)), nil
+	return []byte(fmt.Sprintf("\"%04d-%02d-%02d\"", d.Year, d.Month, d.DayOfMonth)), nil
 }
 
 // ParseDate will parse a date in the format yyyy-mm-dd.
