@@ -10,7 +10,7 @@ import (
 // Date represents a single day in Garmin Connect.
 type Date struct {
 	Year       int
-	Month      int
+	Month      time.Month
 	DayOfMonth int
 }
 
@@ -30,9 +30,7 @@ func (d *Date) UnmarshalJSON(value []byte) error {
 	if err == nil {
 		t := time.Unix(i/1000, 0)
 
-		d.Year = t.Year()
-		d.Month = int(t.Month())
-		d.DayOfMonth = t.Day()
+		d.Year, d.Month, d.DayOfMonth = t.Date()
 
 		return nil
 	}
@@ -67,4 +65,13 @@ func (d Date) String() string {
 	}
 
 	return fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, d.DayOfMonth)
+}
+
+// Today will return a Date set to today.
+func Today() Date {
+	d := Date{}
+
+	d.Year, d.Month, d.DayOfMonth = time.Now().Date()
+
+	return d
 }
