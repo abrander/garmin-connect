@@ -49,6 +49,16 @@ func (d *Date) UnmarshalJSON(value []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler.
+func (d Date) MarshalJSON() ([]byte, error) {
+	// To better support the Garmin API we marshal the empty value as null.
+	if d.Year == 0 && d.Month == 0 && d.DayOfMonth == 0 {
+		return []byte("null"), nil
+	}
+
+	return []byte(fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, d.DayOfMonth)), nil
+}
+
 // ParseDate will parse a date in the format yyyy-mm-dd.
 func ParseDate(in string) (Date, error) {
 	d := Date{}
