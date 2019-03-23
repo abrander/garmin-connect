@@ -71,6 +71,14 @@ func init() {
 		Args:  cobra.RangeArgs(0, 1),
 	}
 	weightCmd.AddCommand(weightGoalCmd)
+
+	weightGoalSetCmd := &cobra.Command{
+		Use:   "set [goal in gram]",
+		Short: "Set weight goal",
+		Run:   weightGoalSet,
+		Args:  cobra.ExactArgs(1),
+	}
+	weightGoalCmd.AddCommand(weightGoalSetCmd)
 }
 
 func weightLatest(_ *cobra.Command, _ []string) {
@@ -205,4 +213,12 @@ func weightGoal(_ *cobra.Command, args []string) {
 	t.AddValue("Created", goal.Created)
 	t.AddValueUnit("Target", float64(goal.Value)/1000.0, "kg")
 	t.Output(os.Stdout)
+}
+
+func weightGoalSet(_ *cobra.Command, args []string) {
+	goal, err := strconv.Atoi(args[0])
+	bail(err)
+
+	err = client.SetWeightGoal(goal)
+	bail(err)
 }

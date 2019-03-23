@@ -135,3 +135,20 @@ func (c *Client) WeightGoal(displayName string) (*Goal, error) {
 
 	return &goals[0], nil
 }
+
+// SetWeightGoal will set a new weight goal.
+func (c *Client) SetWeightGoal(goal int) error {
+	if !c.authenticated() || c.Profile == nil {
+		return ErrNotAuthenticated
+	}
+
+	g := Goal{
+		Created:   Today(),
+		Start:     Today(),
+		GoalType:  4,
+		ProfileID: c.Profile.ProfileID,
+		Value:     goal,
+	}
+
+	return c.AddGoal(c.Profile.DisplayName, g)
+}
