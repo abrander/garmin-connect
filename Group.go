@@ -69,7 +69,7 @@ func (c *Client) SearchGroups(keyword string) ([]Group, error) {
 
 	payload := url.Values{
 		"start":   {"1"},
-		"limit":   {"20"},
+		"limit":   {"100"},
 		"keyword": {keyword},
 	}
 
