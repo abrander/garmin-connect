@@ -150,5 +150,15 @@ func (c *Client) SetWeightGoal(goal int) error {
 		Value:     goal,
 	}
 
+	goals, err := c.Goals("", 4)
+	if err != nil {
+		return err
+	}
+
+	if len(goals) >= 1 {
+		g.ID = goals[0].ID
+		return c.UpdateGoal("", g)
+	}
+
 	return c.AddGoal(c.Profile.DisplayName, g)
 }
