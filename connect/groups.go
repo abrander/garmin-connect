@@ -94,10 +94,18 @@ func groupsSearch(_ *cobra.Command, args []string) {
 	groups, err := client.SearchGroups(keyword)
 	bail(err)
 
+	lastID := 0
+
 	t := NewTable()
 	t.AddHeader("ID", "Name", "Description", "Profile Image")
 	for _, g := range groups {
+		if g.ID == lastID {
+			continue
+		}
+
 		t.AddRow(strconv.Itoa(g.ID), g.Name, g.Description, g.ProfileImageURLLarge)
+
+		lastID = g.ID
 	}
 	t.Output(os.Stdout)
 }
