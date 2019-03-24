@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	connect "github.com/abrander/garmin-connect"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +27,19 @@ func info(_ *cobra.Command, args []string) {
 	t := NewTabular()
 
 	socialProfile, err := client.SocialProfile(displayName)
-	bail(err)
+	if err == connect.ErrNotFound {
+		bail(err)
+	}
+
+	if err == nil {
+		displayName = socialProfile.DisplayName
+	} else {
+		socialProfile, err = client.PublicSocialProfile(displayName)
+		bail(err)
+
+		displayName = socialProfile.DisplayName
+	}
+
 	t.AddValue("ID", socialProfile.ID)
 	t.AddValue("Profile ID", socialProfile.ProfileID)
 	t.AddValue("Display Name", socialProfile.DisplayName)
@@ -35,48 +48,49 @@ func info(_ *cobra.Command, args []string) {
 	t.AddValue("Points", socialProfile.UserPoint)
 	t.AddValue("Profile Image", socialProfile.ProfileImageURLLarge)
 
-	info, err := client.PersonalInformation(socialProfile.DisplayName)
-	bail(err)
-
-	t.AddValue("", "")
-	t.AddValue("Gender", info.UserInfo.Gender)
-	t.AddValueUnit("Age", info.UserInfo.Age, "years")
-	t.AddValueUnit("Height", info.BiometricProfile.Height, "cm")
-	t.AddValueUnit("Weight", info.BiometricProfile.Weight/1000.0, "kg")
-	t.AddValueUnit("Vo² Max", info.BiometricProfile.VO2Max, "mL/kg/min")
-	t.AddValueUnit("Vo² Max (cycling)", info.BiometricProfile.VO2MaxCycling, "mL/kg/min")
-
-	life, err := client.LifetimeActivities(socialProfile.DisplayName)
-	bail(err)
-
-	t.AddValue("", "")
-	t.AddValue("Activities", life.Activities)
-	t.AddValueUnit("Distance", life.Distance/1000.0, "km")
-	t.AddValueUnit("Time", (time.Duration(life.Duration) * time.Second).Round(time.Second).String(), "hms")
-	t.AddValueUnit("Calories", life.Calories/4.184, "Kcal")
-	t.AddValueUnit("Elev Gain", life.ElevationGain, "m")
-
-	totals, err := client.LifetimeTotals(socialProfile.DisplayName)
-	bail(err)
-
-	t.AddValue("", "")
-	t.AddValueUnit("Steps", totals.Steps, "steps")
-	t.AddValueUnit("Distance", totals.Distance/1000.0, "km")
-	t.AddValueUnit("Daily Goal Met", totals.GoalsMetInDays, "days")
-	t.AddValueUnit("Active Days", totals.ActiveDays, "days")
-	if totals.ActiveDays > 0 {
-		t.AddValueUnit("Average Steps", totals.Steps/totals.ActiveDays, "steps")
+	info, err := client.PersonalInformation(displayName)
+	if err == nil {
+		t.AddValue("", "")
+		t.AddValue("Gender", info.UserInfo.Gender)
+		t.AddValueUnit("Age", info.UserInfo.Age, "years")
+		t.AddValueUnit("Height", info.BiometricProfile.Height, "cm")
+		t.AddValueUnit("Weight", info.BiometricProfile.Weight/1000.0, "kg")
+		t.AddValueUnit("Vo² Max", info.BiometricProfile.VO2Max, "mL/kg/min")
+		t.AddValueUnit("Vo² Max (cycling)", info.BiometricProfile.VO2MaxCycling, "mL/kg/min")
 	}
-	t.AddValueUnit("Calories", totals.Calories, "kCal")
 
-	lastUsed, err := client.LastUsed(socialProfile.DisplayName)
-	bail(err)
+	life, err := client.LifetimeActivities(displayName)
+	if err == nil {
+		t.AddValue("", "")
+		t.AddValue("Activities", life.Activities)
+		t.AddValueUnit("Distance", life.Distance/1000.0, "km")
+		t.AddValueUnit("Time", (time.Duration(life.Duration) * time.Second).Round(time.Second).String(), "hms")
+		t.AddValueUnit("Calories", life.Calories/4.184, "Kcal")
+		t.AddValueUnit("Elev Gain", life.ElevationGain, "m")
+	}
 
-	t.AddValue("", "")
-	t.AddValue("Device ID", lastUsed.DeviceID)
-	t.AddValue("Device", lastUsed.DeviceName)
-	t.AddValue("Time", lastUsed.DeviceUploadTime.String())
-	t.AddValue("Ago", time.Since(lastUsed.DeviceUploadTime.Time).Round(time.Second).String())
-	t.AddValue("Image", lastUsed.ImageURL)
+	totals, err := client.LifetimeTotals(displayName)
+	if err == nil {
+		t.AddValue("", "")
+		t.AddValueUnit("Steps", totals.Steps, "steps")
+		t.AddValueUnit("Distance", totals.Distance/1000.0, "km")
+		t.AddValueUnit("Daily Goal Met", totals.GoalsMetInDays, "days")
+		t.AddValueUnit("Active Days", totals.ActiveDays, "days")
+		if totals.ActiveDays > 0 {
+			t.AddValueUnit("Average Steps", totals.Steps/totals.ActiveDays, "steps")
+		}
+		t.AddValueUnit("Calories", totals.Calories, "kCal")
+	}
+
+	lastUsed, err := client.LastUsed(displayName)
+	if err == nil {
+		t.AddValue("", "")
+		t.AddValue("Device ID", lastUsed.DeviceID)
+		t.AddValue("Device", lastUsed.DeviceName)
+		t.AddValue("Time", lastUsed.DeviceUploadTime.String())
+		t.AddValue("Ago", time.Since(lastUsed.DeviceUploadTime.Time).Round(time.Second).String())
+		t.AddValue("Image", lastUsed.ImageURL)
+	}
+
 	t.Output(os.Stdout)
 }
