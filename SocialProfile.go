@@ -34,3 +34,17 @@ func (c *Client) SocialProfile(displayName string) (*SocialProfile, error) {
 
 	return profile, err
 }
+
+// PublicSocialProfile retrieves the public profile for displayName.
+func (c *Client) PublicSocialProfile(displayName string) (*SocialProfile, error) {
+	URL := "https://connect.garmin.com/modern/proxy/userprofile-service/socialProfile/public/" + displayName
+
+	profile := new(SocialProfile)
+
+	err := c.getJSON(URL, profile)
+	if err != nil {
+		return nil, err
+	}
+
+	return profile, err
+}
