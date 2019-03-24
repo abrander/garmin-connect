@@ -93,3 +93,21 @@ func (c *Client) DeleteGoal(displayName string, goalID int) error {
 
 	return c.write("DELETE", URL, nil, 204)
 }
+
+// UpdateGoal will update an existing goal.
+func (c *Client) UpdateGoal(displayName string, goal Goal) error {
+	if displayName == "" && c.Profile == nil {
+		return ErrNotAuthenticated
+	}
+
+	if displayName == "" && c.Profile != nil {
+		displayName = c.Profile.DisplayName
+	}
+
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/wellness-service/wellness/wellness-goals/%d/%s",
+		goal.ID,
+		displayName,
+	)
+
+	return c.write("PUT", URL, goal, 204)
+}
