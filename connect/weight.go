@@ -187,11 +187,11 @@ func weightRange(_ *cobra.Command, args []string) {
 			weightin.Date,
 			weightin.Weight/1000.0,
 			weightin.BMI,
-			weightin.BodyFatPercentage,
-			weightin.Weight*weightin.BodyFatPercentage/100000.0,
-			weightin.BodyWater,
-			float64(weightin.BoneMass)/1000.0,
-			float64(weightin.MuscleMass)/1000.0,
+			nzf(weightin.BodyFatPercentage),
+			nzf(weightin.Weight*weightin.BodyFatPercentage/100000.0),
+			nzf(weightin.BodyWater),
+			nzf(float64(weightin.BoneMass)/1000.0),
+			nzf(float64(weightin.MuscleMass)/1000.0),
 		)
 	}
 	fmt.Fprintf(os.Stdout, "\n")
