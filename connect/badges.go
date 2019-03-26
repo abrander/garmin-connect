@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/abrander/garmin-connect"
+	connect "github.com/abrander/garmin-connect"
 )
 
 const gotIt = "✓"
@@ -91,7 +91,11 @@ func badgesEarned(_ *cobra.Command, args []string) {
 	t := NewTable()
 	t.AddHeader("Badge", "Points", "Date")
 	for _, badge := range badges {
-		t.AddRow(badge.Name, fmt.Sprintf("%d x%d", badge.Points, badge.EarnedNumber), badge.EarnedDate.String())
+		p := fmt.Sprintf("%d", badge.Points)
+		if badge.EarnedNumber > 1 {
+			p = fmt.Sprintf("%d x%d", badge.Points, badge.EarnedNumber)
+		}
+		t.AddRow(badge.Name, p, badge.EarnedDate.String())
 	}
 	t.Output(os.Stdout)
 }
