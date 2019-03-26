@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -19,4 +20,39 @@ func formatTime(t time.Time) string {
 	}
 
 	return fmt.Sprintf("%02d:%02d", t.Hour(), t.Minute())
+}
+
+func stringer(value interface{}) string {
+	stringer, ok := value.(fmt.Stringer)
+	if ok {
+		return stringer.String()
+	}
+
+	str := ""
+	switch value.(type) {
+	case string:
+		str = value.(string)
+	case int, int64:
+		str = fmt.Sprintf("%d", value)
+	case float64:
+		str = strconv.FormatFloat(value.(float64), 'f', 1, 64)
+	case bool:
+		if value.(bool) {
+			str = gotIt
+		}
+	default:
+		panic(fmt.Sprintf("no idea what to do about %T:%v", value, value))
+	}
+
+	return str
+}
+
+func sliceStringer(values []interface{}) []string {
+	ret := make([]string, len(values), len(values))
+
+	for i, value := range values {
+		ret[i] = stringer(value)
+	}
+
+	return ret
 }

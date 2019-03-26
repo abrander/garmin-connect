@@ -184,14 +184,14 @@ func weightRange(_ *cobra.Command, args []string) {
 		}
 
 		t2.AddRow(
-			weightin.Date.String(),
-			fmt.Sprintf("%.1f", weightin.Weight/1000.0),
-			fmt.Sprintf("%.1f", weightin.BMI),
-			fmt.Sprintf("%.1f", weightin.BodyFatPercentage),
-			fmt.Sprintf("%.1f", weightin.Weight*weightin.BodyFatPercentage/100000.0),
-			fmt.Sprintf("%.1f", weightin.BodyWater),
-			fmt.Sprintf("%.1f", float64(weightin.BoneMass)/1000.0),
-			fmt.Sprintf("%.1f", float64(weightin.MuscleMass)/1000.0),
+			weightin.Date,
+			weightin.Weight/1000.0,
+			weightin.BMI,
+			weightin.BodyFatPercentage,
+			weightin.Weight*weightin.BodyFatPercentage/100000.0,
+			weightin.BodyWater,
+			float64(weightin.BoneMass)/1000.0,
+			float64(weightin.MuscleMass)/1000.0,
 		)
 	}
 	fmt.Fprintf(os.Stdout, "\n")

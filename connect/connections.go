@@ -86,7 +86,7 @@ func connectionsPending(_ *cobra.Command, _ []string) {
 	t := NewTable()
 	t.AddHeader("RequestID", "Display Name", "Name", "Location", "Profile Image")
 	for _, c := range connections {
-		t.AddRow(strconv.Itoa(c.ConnectionRequestID), c.DisplayName, c.Fullname, c.Location, c.ProfileImageURLMedium)
+		t.AddRow(c.ConnectionRequestID, c.DisplayName, c.Fullname, c.Location, c.ProfileImageURLMedium)
 	}
 	t.Output(os.Stdout)
 }

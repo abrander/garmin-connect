@@ -84,7 +84,7 @@ func groupsList(_ *cobra.Command, args []string) {
 	t := NewTable()
 	t.AddHeader("ID", "Name", "Description", "Profile Image")
 	for _, g := range groups {
-		t.AddRow(strconv.Itoa(g.ID), g.Name, g.Description, g.ProfileImageURLLarge)
+		t.AddRow(g.ID, g.Name, g.Description, g.ProfileImageURLLarge)
 	}
 	t.Output(os.Stdout)
 }
@@ -103,7 +103,7 @@ func groupsSearch(_ *cobra.Command, args []string) {
 			continue
 		}
 
-		t.AddRow(strconv.Itoa(g.ID), g.Name, g.Description, g.ProfileImageURLLarge)
+		t.AddRow(g.ID, g.Name, g.Description, g.ProfileImageURLLarge)
 
 		lastID = g.ID
 	}
@@ -167,7 +167,7 @@ func groupsViewMembers(_ *cobra.Command, args []string) {
 	t := NewTable()
 	t.AddHeader("Display Name", "Joined", "Name", "Location", "Role", "Profile Image")
 	for _, m := range members {
-		t.AddRow(m.DisplayName, formatDate(m.Joined), m.Fullname, m.Location, m.Role, m.ProfileImageURLMedium)
+		t.AddRow(m.DisplayName, m.Joined, m.Fullname, m.Location, m.Role, m.ProfileImageURLMedium)
 	}
 	t.Output(os.Stdout)
 }

@@ -66,7 +66,7 @@ func badgesLeaderboard(_ *cobra.Command, _ []string) {
 	t := NewTable()
 	t.AddHeader("Display Name", "Name", "Level", "Points")
 	for _, status := range leaderboard {
-		t.AddRow(status.DisplayName, status.Fullname, strconv.Itoa(status.Level), strconv.Itoa(status.Point))
+		t.AddRow(status.DisplayName, status.Fullname, status.Level, status.Point)
 	}
 	t.Output(os.Stdout)
 }
@@ -107,7 +107,7 @@ func badgesAvailable(_ *cobra.Command, _ []string) {
 	t := NewTable()
 	t.AddHeader("ID", "Key", "Name", "Points")
 	for _, badge := range badges {
-		t.AddRow(strconv.Itoa(badge.ID), badge.Key, badge.Name, strconv.Itoa(badge.Points))
+		t.AddRow(badge.ID, badge.Key, badge.Name, badge.Points)
 	}
 	t.Output(os.Stdout)
 }
@@ -133,7 +133,7 @@ func badgesView(_ *cobra.Command, args []string) {
 		t := NewTable()
 		t.AddHeader("Display Name", "Name", "Earned")
 		for _, b := range badge.Connections {
-			t.AddRow(b.DisplayName, b.FullName, formatDate(b.EarnedDate.Time))
+			t.AddRow(b.DisplayName, b.FullName, b.EarnedDate.Time)
 		}
 		t.Output(os.Stdout)
 	}
@@ -148,7 +148,7 @@ func badgesView(_ *cobra.Command, args []string) {
 			if b.EarnedByMe {
 				earned = gotIt
 			}
-			t.AddRow(strconv.Itoa(b.ID), b.Key, b.Name, strconv.Itoa(b.Points), earned)
+			t.AddRow(b.ID, b.Key, b.Name, b.Points, earned)
 		}
 		t.Output(os.Stdout)
 	}
@@ -213,7 +213,7 @@ func badgesCompare(_ *cobra.Command, args []string) {
 				other += fmt.Sprintf(" %dx", e.otherEarned)
 			}
 		}
-		t.AddRow(e.name, me, other, strconv.Itoa(e.points))
+		t.AddRow(e.name, me, other, e.points)
 	}
 
 	t.Output(os.Stdout)

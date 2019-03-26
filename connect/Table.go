@@ -24,15 +24,17 @@ func (t *Table) AddHeader(titles ...string) {
 	}
 }
 
-func (t *Table) AddRow(columns ...string) {
+func (t *Table) AddRow(columns ...interface{}) {
+	cols := sliceStringer(columns)
+
 	if len(columns) != len(t.header) {
 		panic("worng number of columns")
 	}
 
-	t.rows = append(t.rows, columns)
+	t.rows = append(t.rows, cols)
 
-	for i, column := range columns {
-		l := utf8.RuneCountInString(column)
+	for i, col := range cols {
+		l := utf8.RuneCountInString(col)
 
 		if t.columnsMax[i] < l {
 			t.columnsMax[i] = l

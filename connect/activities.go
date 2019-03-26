@@ -84,14 +84,14 @@ func activitiesList(_ *cobra.Command, args []string) {
 	t.AddHeader("ID", "Date", "Name", "Type", "Distance", "Time", "Avg/Max HR", "Calories")
 	for _, a := range activities {
 		t.AddRow(
-			strconv.Itoa(a.ID),
-			formatDate(a.StartLocal.Time),
+			a.ID,
+			a.StartLocal.Time,
 			a.ActivityName,
 			a.ActivityType.TypeKey,
-			fmt.Sprintf("%.0f", a.Distance),
-			formatTime(a.StartLocal.Time),
+			a.Distance,
+			a.StartLocal,
 			fmt.Sprintf("%.0f/%.0f", a.AverageHeartRate, a.MaxHeartRate),
-			fmt.Sprintf("%.0f", a.Calories),
+			a.Calories,
 		)
 	}
 	t.Output(os.Stdout)

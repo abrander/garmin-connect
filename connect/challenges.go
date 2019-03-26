@@ -86,7 +86,7 @@ func challengesList(_ *cobra.Command, args []string) {
 	t := NewTable()
 	t.AddHeader("ID", "Start", "End", "Description", "Name", "Rank")
 	for _, c := range challenges {
-		t.AddRow(c.UUID, c.Start.String(), c.End.String(), c.Description, c.Name, strconv.Itoa(c.UserRanking))
+		t.AddRow(c.UUID, c.Start, c.End, c.Description, c.Name, c.UserRanking)
 	}
 	t.Output(os.Stdout)
 }
@@ -98,7 +98,7 @@ func challengesListInvites(_ *cobra.Command, _ []string) {
 	t := NewTable()
 	t.AddHeader("Invite ID", "Challenge ID", "Start", "End", "Description", "Name", "Rank")
 	for _, c := range challenges {
-		t.AddRow(strconv.Itoa(c.InviteID), c.UUID, c.Start.String(), c.End.String(), c.Description, c.Name, strconv.Itoa(c.UserRanking))
+		t.AddRow(c.InviteID, c.UUID, c.Start, c.End, c.Description, c.Name, c.UserRanking)
 	}
 	t.Output(os.Stdout)
 }
@@ -126,7 +126,7 @@ func challengesListPrevious(_ *cobra.Command, args []string) {
 	t := NewTable()
 	t.AddHeader("ID", "Start", "End", "Description", "Name", "Rank")
 	for _, c := range challenges {
-		t.AddRow(c.UUID, c.Start.String(), c.End.String(), c.Description, c.Name, strconv.Itoa(c.UserRanking))
+		t.AddRow(c.UUID, c.Start, c.End, c.Description, c.Name, c.UserRanking)
 	}
 	t.Output(os.Stdout)
 }

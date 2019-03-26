@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 
@@ -45,14 +44,14 @@ func goalsList(_ *cobra.Command, args []string) {
 
 		for _, g := range goals {
 			t.AddRow(
-				fmt.Sprintf("%d", g.ID),
-				fmt.Sprintf("%d", g.ProfileID),
-				strconv.Itoa(g.GoalCategory),
-				g.GoalType.String(),
-				g.Start.String(),
-				g.End.String(),
-				g.Created.String(),
-				strconv.Itoa(g.Value),
+				g.ID,
+				g.ProfileID,
+				g.GoalCategory,
+				g.GoalType,
+				g.Start,
+				g.End,
+				g.Created,
+				g.Value,
 			)
 		}
 	}
