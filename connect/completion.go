@@ -15,7 +15,7 @@ func init() {
 	completionBashCmd := &cobra.Command{
 		Use:   "bash",
 		Short: "Output command completion for Bourne Again Shell (bash)",
-		Run:   completionBash,
+		RunE:  completionBash,
 		Args:  cobra.NoArgs,
 	}
 	completionCmd.AddCommand(completionBashCmd)
@@ -23,16 +23,16 @@ func init() {
 	completionZshCmd := &cobra.Command{
 		Use:   "zsh",
 		Short: "Output command completion for Z Shell (zsh)",
-		Run:   completionZsh,
+		RunE:  completionZsh,
 		Args:  cobra.NoArgs,
 	}
 	completionCmd.AddCommand(completionZshCmd)
 }
 
-func completionBash(_ *cobra.Command, _ []string) {
-	rootCmd.GenBashCompletion(os.Stdout)
+func completionBash(_ *cobra.Command, _ []string) error {
+	return rootCmd.GenBashCompletion(os.Stdout)
 }
 
-func completionZsh(_ *cobra.Command, _ []string) {
-	rootCmd.GenZshCompletion(os.Stdout)
+func completionZsh(_ *cobra.Command, _ []string) error {
+	return rootCmd.GenZshCompletion(os.Stdout)
 }

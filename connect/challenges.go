@@ -152,7 +152,7 @@ func challengesView(_ *cobra.Command, args []string) {
 	challenge, err := client.AdhocChallenge(uuid)
 	bail(err)
 
-	players := make([]string, len(challenge.Players), len(challenge.Players))
+	players := make([]string, len(challenge.Players))
 	for i, player := range challenge.Players {
 		players[i] = player.FullName
 	}

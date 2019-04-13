@@ -18,7 +18,7 @@ func NewTable() *Table {
 
 func (t *Table) AddHeader(titles ...string) {
 	t.header = titles
-	t.columnsMax = make([]int, len(t.header), len(t.header))
+	t.columnsMax = make([]int, len(t.header))
 	for i, title := range t.header {
 		t.columnsMax[i] = utf8.RuneCountInString(title)
 	}

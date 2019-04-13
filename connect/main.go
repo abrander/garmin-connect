@@ -91,6 +91,6 @@ func authenticate(_ *cobra.Command, args []string) {
 }
 
 func signout(_ *cobra.Command, _ []string) {
-	client.Signout()
+	_ = client.Signout()
 	client.Password = ""
 }

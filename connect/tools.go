@@ -21,15 +21,15 @@ func stringer(value interface{}) string {
 	}
 
 	str := ""
-	switch value.(type) {
+	switch v := value.(type) {
 	case string:
-		str = value.(string)
+		str = v
 	case int, int64:
-		str = fmt.Sprintf("%d", value)
+		str = fmt.Sprintf("%d", v)
 	case float64:
-		str = strconv.FormatFloat(value.(float64), 'f', 1, 64)
+		str = strconv.FormatFloat(v, 'f', 1, 64)
 	case bool:
-		if value.(bool) {
+		if v {
 			str = gotIt
 		}
 	default:
@@ -40,7 +40,7 @@ func stringer(value interface{}) string {
 }
 
 func sliceStringer(values []interface{}) []string {
-	ret := make([]string, len(values), len(values))
+	ret := make([]string, len(values))
 
 	for i, value := range values {
 		ret[i] = stringer(value)
