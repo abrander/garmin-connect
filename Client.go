@@ -252,6 +252,16 @@ func (c *Client) getString(URL string) (string, error) {
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	c.debugLogger.Printf("Requesting %s at %s", req.Method, req.URL.String())
 
+	// Save the body in case we need to replay the request.
+	var save io.ReadCloser = nil
+	var err error
+	if req.Body != nil {
+		save, req.Body, err = drainBody(req.Body)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	c.dump(req)
 	t0 := time.Now()
 	resp, err := c.client.Do(req)
@@ -270,6 +280,7 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 	// assume our current session is invalid.
 	for _, cookie := range resp.Cookies() {
 		if cookie.Name == sessionCookieName {
+			resp.Body.Close()
 			c.debugLogger.Printf("Session invalid, requesting new session")
 
 			// Wups. Our session got invalidated.
@@ -282,6 +293,9 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 			}
 
 			c.debugLogger.Printf("Successfully authenticated as %s", c.Email)
+
+			// Replace the drained body
+			req.Body = save
 
 			// Replace the cookie ned newRequest with the new sessionid.
 			req.Header.Del("Cookie")
