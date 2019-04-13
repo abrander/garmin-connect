@@ -356,12 +356,20 @@ func (c *Client) Authenticate() error {
 
 	c.debugLogger.Printf("Trying credentials at %s", URL)
 
-	// Get ticket from Garmin SSO.
-	resp, err := c.client.PostForm(URL, url.Values{
+	formValues := url.Values{
 		"username": {c.Email},
 		"password": {c.Password},
 		"embed":    {"false"},
-	})
+	}
+
+	req, err := http.NewRequest("POST", URL, strings.NewReader(formValues.Encode()))
+	if err != nil {
+		return nil
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	c.dump(req)
+
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -384,7 +392,7 @@ func (c *Client) Authenticate() error {
 	c.debugLogger.Printf("Requesting session at ticket URL %s", ticketURL)
 
 	// Use ticket to request session.
-	req, _ := c.newRequest("GET", ticketURL, nil)
+	req, _ = c.newRequest("GET", ticketURL, nil)
 	c.dump(req)
 	resp, err = c.client.Do(req)
 	if err != nil {
@@ -414,6 +422,7 @@ func (c *Client) Authenticate() error {
 	c.debugLogger.Printf("Redeeming session id at %s", location)
 
 	req, _ = c.newRequest("GET", location, nil)
+	c.dump(req)
 	resp, err = c.client.Do(req)
 	if err != nil {
 		return err
