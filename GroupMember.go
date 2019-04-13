@@ -40,7 +40,7 @@ func (c *Client) GroupMembers(groupID int) ([]GroupMember, error) {
 		return nil, err
 	}
 
-	members := make([]GroupMember, len(membersProxy), len(membersProxy))
+	members := make([]GroupMember, len(membersProxy))
 	for i, p := range membersProxy {
 		members[i].DisplayName = p.DisplayName
 		members[i].ProfileID = p.UserProfileID

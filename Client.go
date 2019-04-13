@@ -134,18 +134,18 @@ func (c *Client) dump(reqResp interface{}) {
 	}
 
 	var dump []byte
-	switch reqResp.(type) {
+	switch obj := reqResp.(type) {
 	case *http.Request:
-		c.dumpWriter.Write([]byte("\n\nREQUEST\n"))
-		dump, _ = httputil.DumpRequestOut(reqResp.(*http.Request), true)
+		_, _ = c.dumpWriter.Write([]byte("\n\nREQUEST\n"))
+		dump, _ = httputil.DumpRequestOut(obj, true)
 	case *http.Response:
-		c.dumpWriter.Write([]byte("\n\nRESPONSE\n"))
-		dump, _ = httputil.DumpResponse(reqResp.(*http.Response), true)
+		_, _ = c.dumpWriter.Write([]byte("\n\nRESPONSE\n"))
+		dump, _ = httputil.DumpResponse(obj, true)
 	default:
 		panic("unsupported type")
 	}
 
-	c.dumpWriter.Write(dump)
+	_, _ = c.dumpWriter.Write(dump)
 }
 
 func (c *Client) cookie() *http.Cookie {

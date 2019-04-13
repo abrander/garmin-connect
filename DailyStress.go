@@ -45,7 +45,7 @@ func (c *Client) DailyStress(date time.Time) (*DailyStress, error) {
 	}
 
 	ret := &proxy.DailyStress
-	ret.Values = make([]StressPoint, len(proxy.StressValuesArray), len(proxy.StressValuesArray))
+	ret.Values = make([]StressPoint, len(proxy.StressValuesArray))
 
 	for i, point := range proxy.StressValuesArray {
 		ret.Values[i].Timestamp = time.Unix(point[0]/1000, 0)
