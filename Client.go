@@ -229,26 +229,6 @@ func (c *Client) write(method string, URL string, payload interface{}, expectedS
 	return nil
 }
 
-func (c *Client) getString(URL string) (string, error) {
-	req, err := c.newRequest("GET", URL, nil)
-	if err != nil {
-		return "", err
-	}
-
-	resp, err := c.do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	return string(body), nil
-}
-
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	c.debugLogger.Printf("Requesting %s at %s", req.Method, req.URL.String())
 
