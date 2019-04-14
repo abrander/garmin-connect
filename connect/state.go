@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/abrander/garmin-connect"
+	connect "github.com/abrander/garmin-connect"
 )
 
 var (

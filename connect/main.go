@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 
-	"github.com/abrander/garmin-connect"
+	connect "github.com/abrander/garmin-connect"
 )
 
 var (
@@ -80,10 +80,10 @@ func authenticate(_ *cobra.Command, args []string) {
 
 	fmt.Print("Password: ")
 
-	password, err := terminal.ReadPassword(int(syscall.Stdin))
+	password, err := terminal.ReadPassword(syscall.Stdin)
 	bail(err)
 
-	client.SetOptions(connect.Credentials(string(email), string(password)))
+	client.SetOptions(connect.Credentials(email, string(password)))
 	err = client.Authenticate()
 	bail(err)
 
