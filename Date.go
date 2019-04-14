@@ -16,7 +16,7 @@ type Date struct {
 
 // Time returns a time.Time for usage in other packages.
 func (d Date) Time() time.Time {
-	return time.Date(d.Year, time.Month(d.Month), d.DayOfMonth, 0, 0, 0, 0, time.UTC)
+	return time.Date(d.Year, d.Month, d.DayOfMonth, 0, 0, 0, 0, time.UTC)
 }
 
 // UnmarshalJSON implements json.Unmarshaler.

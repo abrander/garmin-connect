@@ -27,7 +27,7 @@ func (c *Client) LifetimeActivities(displayName string) (*LifetimeActivities, er
 	}
 
 	if len(proxy.Activities) != 1 {
-		return nil, errors.New("Unexpected data")
+		return nil, errors.New("unexpected data")
 	}
 
 	return &proxy.Activities[0], err

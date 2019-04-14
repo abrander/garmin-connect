@@ -114,7 +114,7 @@ func (c *Client) ExportActivity(id int, w io.Writer, format int) error {
 	}
 
 	if format >= formatMax || format < FormatFIT {
-		return errors.New("Invalid format")
+		return errors.New("invalid format")
 	}
 
 	URL := fmt.Sprintf(formatTable[format], id)

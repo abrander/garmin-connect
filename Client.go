@@ -19,27 +19,27 @@ import (
 var (
 	// ErrForbidden will be returned if the client doesn't have access to the
 	// requested ressource.
-	ErrForbidden = errors.New("Forbidden")
+	ErrForbidden = errors.New("forbidden")
 
 	// ErrNotFound will be returned if the requested ressource could not be
 	// found.
-	ErrNotFound = errors.New("Not found")
+	ErrNotFound = errors.New("not found")
 
 	// ErrBadRequest will be returned if Garmin returned a status code 400.
-	ErrBadRequest = errors.New("Bad request")
+	ErrBadRequest = errors.New("bad request")
 
 	// ErrNoCredentials will be returned if credentials are needed - but none
 	// are set.
-	ErrNoCredentials = errors.New("No credentials set")
+	ErrNoCredentials = errors.New("no credentials set")
 
 	// ErrNotAuthenticated will be returned is the client is not
 	// authenticated as required by the request. Remember to call
 	// Authenticate().
-	ErrNotAuthenticated = errors.New("Client is not authenticated")
+	ErrNotAuthenticated = errors.New("client is not authenticated")
 
 	// ErrWrongCredentials will be returned if the username and/or
 	// password is not recognized by Garmin Connect.
-	ErrWrongCredentials = errors.New("Username and/or password not recognized")
+	ErrWrongCredentials = errors.New("username and/or password not recognized")
 )
 
 const (
@@ -172,8 +172,8 @@ func (c *Client) newRequest(method string, url string, body io.Reader) (*http.Re
 	return req, nil
 }
 
-func (c *Client) getJSON(URL string, target interface{}) error {
-	req, err := c.newRequest("GET", URL, nil)
+func (c *Client) getJSON(url string, target interface{}) error {
+	req, err := c.newRequest("GET", url, nil)
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func (c *Client) getJSON(URL string, target interface{}) error {
 
 // write is suited for writing stuff to the API when you're NOT expected any
 // data in return but a HTTP status code.
-func (c *Client) write(method string, URL string, payload interface{}, expectedStatus int) error {
+func (c *Client) write(method string, url string, payload interface{}, expectedStatus int) error {
 	var body io.Reader
 
 	if payload != nil {
@@ -203,7 +203,7 @@ func (c *Client) write(method string, URL string, payload interface{}, expectedS
 		body = bytes.NewReader(b)
 	}
 
-	req, err := c.newRequest(method, URL, body)
+	req, err := c.newRequest(method, url, body)
 	if err != nil {
 		return err
 	}
@@ -233,7 +233,7 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 	c.debugLogger.Printf("Requesting %s at %s", req.Method, req.URL.String())
 
 	// Save the body in case we need to replay the request.
-	var save io.ReadCloser = nil
+	var save io.ReadCloser
 	var err error
 	if req.Body != nil {
 		save, req.Body, err = drainBody(req.Body)
@@ -313,8 +313,8 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 	return resp, err
 }
 
-func (c *Client) download(URL string, w io.Writer) error {
-	req, err := c.newRequest("GET", URL, nil)
+func (c *Client) download(url string, w io.Writer) error {
+	req, err := c.newRequest("GET", url, nil)
 	if err != nil {
 		return err
 	}
