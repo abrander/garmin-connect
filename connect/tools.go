@@ -48,3 +48,19 @@ func sliceStringer(values []interface{}) []string {
 
 	return ret
 }
+
+func hoursAndMinutes(dur time.Duration) string {
+	if dur < 60*time.Minute {
+		m := dur.Truncate(time.Minute)
+
+		return fmt.Sprintf("%dm", m/time.Minute)
+	}
+
+	h := dur.Truncate(time.Hour)
+	m := (dur - h).Truncate(time.Minute)
+
+	h /= time.Hour
+	m /= time.Minute
+
+	return fmt.Sprintf("%dh%dm", h, m)
+}
