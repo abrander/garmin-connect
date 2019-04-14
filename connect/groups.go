@@ -24,7 +24,7 @@ func init() {
 	groupsCmd.AddCommand(groupsListCmd)
 
 	groupsViewCmd := &cobra.Command{
-		Use:   "view <group name>",
+		Use:   "view <group id>",
 		Short: "View group details",
 		Run:   groupsView,
 		Args:  cobra.ExactArgs(1),
