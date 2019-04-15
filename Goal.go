@@ -26,6 +26,8 @@ func (t GoalType) String() string {
 		return "steps-per-day"
 	case 4:
 		return "weight"
+	case 7:
+		return "floors-ascended"
 	default:
 		return fmt.Sprintf("unknown:%d", t)
 	}
