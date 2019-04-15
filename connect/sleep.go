@@ -46,6 +46,9 @@ func sleepSummary(_ *cobra.Command, args []string) {
 	t.AddValue("Light", hoursAndMinutes(summary.Light))
 	t.AddValue("REM", hoursAndMinutes(summary.REM))
 	t.AddValue("Awake", hoursAndMinutes(summary.Awake))
+	t.AddValue("Confirmed", summary.Confirmed)
+	t.AddValue("Confirmation Type", summary.Confirmation)
+	t.AddValue("REM Data", summary.REMData)
 	t.Output(os.Stdout)
 
 	fmt.Fprintf(os.Stdout, "\n")
