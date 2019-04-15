@@ -50,6 +50,10 @@ func sliceStringer(values []interface{}) []string {
 }
 
 func hoursAndMinutes(dur time.Duration) string {
+	if dur == 0 {
+		return "-"
+	}
+
 	if dur < 60*time.Minute {
 		m := dur.Truncate(time.Minute)
 
