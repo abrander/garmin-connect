@@ -342,11 +342,33 @@ func (c *Client) authenticated() bool {
 func (c *Client) Authenticate() error {
 	// We cannot use Client.do() in this function, since this function can be
 	// called from do() upon session renewal.
-	URL := "https://sso.garmin.com/sso/signin?service=https%3A%2F%2Fconnect.garmin.com%2Fmodern%2F"
+	URL := "https://sso.garmin.com/sso/signin?service=https%3A%2F%2Fconnect.garmin.com%2Fmodern%2F&gauthHost=https%3A%2F%2Fsso.garmin.com%2Fsso"
 
 	if c.Email == "" || c.Password == "" {
 		return ErrNoCredentials
 	}
+
+	c.debugLogger.Printf("Getting CSRF token at %s", URL)
+
+	// Start by getting CSRF token.
+	req, err := http.NewRequest("GET", URL, nil)
+	if err != nil {
+		return err
+	}
+	c.dump(req)
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return err
+	}
+	c.dump(resp)
+
+	csrfToken, err := extractCSRFToken(resp.Body)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+
+	c.debugLogger.Printf("Got CSRF token: '%s'", csrfToken)
 
 	c.debugLogger.Printf("Trying credentials at %s", URL)
 
@@ -354,16 +376,19 @@ func (c *Client) Authenticate() error {
 		"username": {c.Email},
 		"password": {c.Password},
 		"embed":    {"false"},
+		"_csrf":    {csrfToken},
 	}
 
-	req, err := http.NewRequest("POST", URL, strings.NewReader(formValues.Encode()))
+	req, err = http.NewRequest("POST", URL, strings.NewReader(formValues.Encode()))
 	if err != nil {
 		return nil
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Origin", "https://sso.garmin.com")
+
 	c.dump(req)
 
-	resp, err := c.client.Do(req)
+	resp, err = c.client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -458,6 +483,26 @@ func extractSocialProfile(body io.Reader) (*SocialProfile, error) {
 	}
 
 	return nil, errors.New("social profile not found in HTML")
+}
+
+// extractCSRFToken will try to extract the CSRF token from the signin form.
+// This is very fragile. Maybe we should replace this madness by a real HTML
+// parser some day.
+func extractCSRFToken(body io.Reader) (string, error) {
+	scanner := bufio.NewScanner(body)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, "name=\"_csrf\"") {
+			line = strings.TrimSpace(line)
+			line = strings.TrimPrefix(line, `<input type="hidden" name="_csrf" value="`)
+			line = strings.TrimSuffix(line, `" />`)
+
+			return line, nil
+		}
+	}
+
+	return "", errors.New("CSRF token not found")
 }
 
 // Signout will end the session with Garmin. If you use this for regular
