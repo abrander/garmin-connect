@@ -1,6 +1,8 @@
 package connect
 
 import (
+	"archive/zip"
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -85,7 +87,7 @@ func (c *Client) RenameActivity(activityID int, newName string) error {
 }
 
 const (
-	// FormatFIT is the "original" Garmin format. Please note that this will be written as a ZIP file (!).
+	// FormatFIT is the "original" Garmin format.
 	FormatFIT = iota
 
 	// FormatTCX is Training Center XML (TCX) format.
@@ -118,6 +120,34 @@ func (c *Client) ExportActivity(id int, w io.Writer, format int) error {
 	}
 
 	URL := fmt.Sprintf(formatTable[format], id)
+
+	// To unzip FIT files on-the-fly, we treat them specially.
+	if format == FormatFIT {
+		buffer := bytes.NewBuffer(nil)
+
+		err := c.download(URL, buffer)
+		if err != nil {
+			return err
+		}
+
+		z, err := zip.NewReader(bytes.NewReader(buffer.Bytes()), int64(buffer.Len()))
+		if err != nil {
+			return err
+		}
+
+		if len(z.File) != 1 {
+			return fmt.Errorf("%d files found in FIT archive, 1 expected", len(z.File))
+		}
+
+		src, err := z.File[0].Open()
+		if err != nil {
+			return err
+		}
+		defer src.Close()
+
+		_, err = io.Copy(w, src)
+		return err
+	}
 
 	return c.download(URL, w)
 }

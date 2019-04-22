@@ -139,7 +139,7 @@ func activitiesExport(_ *cobra.Command, args []string) {
 	}
 
 	filenameTable := map[string]string{
-		"fit": "%d.zip",
+		"fit": "%d.fit",
 		"tcx": "%d.tcx",
 		"gpx": "%d.gpx",
 		"kml": "%d.kml",
