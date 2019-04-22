@@ -53,10 +53,10 @@ func info(_ *cobra.Command, args []string) {
 		t.AddValue("", "")
 		t.AddValue("Gender", info.UserInfo.Gender)
 		t.AddValueUnit("Age", info.UserInfo.Age, "years")
-		t.AddValueUnit("Height", info.BiometricProfile.Height, "cm")
-		t.AddValueUnit("Weight", info.BiometricProfile.Weight/1000.0, "kg")
-		t.AddValueUnit("Vo² Max", info.BiometricProfile.VO2Max, "mL/kg/min")
-		t.AddValueUnit("Vo² Max (cycling)", info.BiometricProfile.VO2MaxCycling, "mL/kg/min")
+		t.AddValueUnit("Height", nzf(info.BiometricProfile.Height), "cm")
+		t.AddValueUnit("Weight", nzf(info.BiometricProfile.Weight/1000.0), "kg")
+		t.AddValueUnit("Vo² Max", nzf(info.BiometricProfile.VO2Max), "mL/kg/min")
+		t.AddValueUnit("Vo² Max (cycling)", nzf(info.BiometricProfile.VO2MaxCycling), "mL/kg/min")
 	}
 
 	life, err := client.LifetimeActivities(displayName)
