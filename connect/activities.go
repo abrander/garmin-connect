@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -138,31 +137,13 @@ func activitiesViewWeather(_ *cobra.Command, args []string) {
 }
 
 func activitiesExport(_ *cobra.Command, args []string) {
-	formatTable := map[string]int{
-		"fit": connect.FormatFIT,
-		"tcx": connect.FormatTCX,
-		"gpx": connect.FormatGPX,
-		"kml": connect.FormatKML,
-		"csv": connect.FormatCSV,
-	}
-
-	filenameTable := map[string]string{
-		"fit": "%d.fit",
-		"tcx": "%d.tcx",
-		"gpx": "%d.gpx",
-		"kml": "%d.kml",
-		"csv": "%d.csv",
-	}
-
-	format, found := formatTable[exportFormat]
-	if !found {
-		bail(errors.New(exportFormat))
-	}
+	format, err := connect.FormatFromExtension(exportFormat)
+	bail(err)
 
 	activityID, err := strconv.Atoi(args[0])
 	bail(err)
 
-	name := fmt.Sprintf(filenameTable[exportFormat], activityID)
+	name := fmt.Sprintf("%d.%s", activityID, format.Extension())
 	f, err := os.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	bail(err)
 
@@ -171,10 +152,15 @@ func activitiesExport(_ *cobra.Command, args []string) {
 }
 
 func activitiesImport(_ *cobra.Command, args []string) {
-	f, err := os.Open(args[0])
+	filename := args[0]
+
+	f, err := os.Open(filename)
 	bail(err)
 
-	id, err := client.ImportActivity(f)
+	format, err := connect.FormatFromFilename(filename)
+	bail(err)
+
+	id, err := client.ImportActivity(f, format)
 	bail(err)
 
 	fmt.Printf("Activity ID %d imported\n", id)

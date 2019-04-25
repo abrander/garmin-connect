@@ -90,28 +90,9 @@ func (c *Client) RenameActivity(activityID int, newName string) error {
 	return c.write("PUT", URL, payload, 204)
 }
 
-const (
-	// FormatFIT is the "original" Garmin format.
-	FormatFIT = iota
-
-	// FormatTCX is Training Center XML (TCX) format.
-	FormatTCX
-
-	// FormatGPX will export as GPX - the GPS Exchange Format.
-	FormatGPX
-
-	// FormatKML will export KML files compatible with Google Earth.
-	FormatKML
-
-	// FormatCSV will export splits as CSV.
-	FormatCSV
-
-	formatMax
-)
-
 // ExportActivity will export an activity from Connect. The activity will be written til w.
-func (c *Client) ExportActivity(id int, w io.Writer, format int) error {
-	formatTable := [formatMax]string{
+func (c *Client) ExportActivity(id int, w io.Writer, format ActivityFormat) error {
+	formatTable := [activityFormatMax]string{
 		"https://connect.garmin.com/modern/proxy/download-service/files/activity/%d",
 		"https://connect.garmin.com/modern/proxy/download-service/export/tcx/activity/%d",
 		"https://connect.garmin.com/modern/proxy/download-service/export/gpx/activity/%d",
@@ -119,14 +100,14 @@ func (c *Client) ExportActivity(id int, w io.Writer, format int) error {
 		"https://connect.garmin.com/modern/proxy/download-service/export/csv/activity/%d",
 	}
 
-	if format >= formatMax || format < FormatFIT {
+	if format >= activityFormatMax || format < ActivityFormatFIT {
 		return errors.New("invalid format")
 	}
 
 	URL := fmt.Sprintf(formatTable[format], id)
 
 	// To unzip FIT files on-the-fly, we treat them specially.
-	if format == FormatFIT {
+	if format == ActivityFormatFIT {
 		buffer := bytes.NewBuffer(nil)
 
 		err := c.download(URL, buffer)
@@ -157,15 +138,22 @@ func (c *Client) ExportActivity(id int, w io.Writer, format int) error {
 }
 
 // ImportActivity will import an activity into Garmin Connect. The activity
-// will be read from file. For now only .fit is supported.
-func (c *Client) ImportActivity(file io.Reader) (int, error) {
-	URL := "https://connect.garmin.com/modern/proxy/upload-service/upload/.fit"
+// will be read from file.
+func (c *Client) ImportActivity(file io.Reader, format ActivityFormat) (int, error) {
+	URL := "https://connect.garmin.com/modern/proxy/upload-service/upload/." + format.Extension()
+
+	switch format {
+	case ActivityFormatFIT, ActivityFormatTCX, ActivityFormatGPX:
+		// These are ok.
+	default:
+		return 0, fmt.Errorf("%s is not supported for import", format.Extension())
+	}
 
 	formData := bytes.Buffer{}
 	writer := multipart.NewWriter(&formData)
 	defer writer.Close()
 
-	activity, err := writer.CreateFormFile("file", "activity.fit")
+	activity, err := writer.CreateFormFile("file", "activity."+format.Extension())
 	if err != nil {
 		return 0, err
 	}
