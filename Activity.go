@@ -3,9 +3,13 @@ package connect
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
+	"net/http"
+	"strings"
 )
 
 // Activity describes a Garmin Connect activity.
@@ -150,6 +154,84 @@ func (c *Client) ExportActivity(id int, w io.Writer, format int) error {
 	}
 
 	return c.download(URL, w)
+}
+
+// ImportActivity will import an activity into Garmin Connect. The activity
+// will be read from file. For now only .fit is supported.
+func (c *Client) ImportActivity(file io.Reader) (int, error) {
+	URL := "https://connect.garmin.com/modern/proxy/upload-service/upload/.fit"
+
+	formData := bytes.Buffer{}
+	writer := multipart.NewWriter(&formData)
+	defer writer.Close()
+
+	activity, err := writer.CreateFormFile("file", "activity.fit")
+	if err != nil {
+		return 0, err
+	}
+
+	_, err = io.Copy(activity, file)
+	if err != nil {
+		return 0, err
+	}
+
+	writer.Close()
+
+	req, err := c.newRequest("POST", URL, &formData)
+	if err != nil {
+		return 0, err
+	}
+
+	req.Header.Add("nk", "NT")
+	req.Header.Add("content-type", writer.FormDataContentType())
+
+	resp, err := c.do(req)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
+
+	// Implement enough of the response to satisfy our needs.
+	var response struct {
+		ImportResult struct {
+			Successes []struct {
+				InternalId int `json:"internalId"`
+			} `json:"successes"`
+
+			Failures []struct {
+				Messages []struct {
+					Content string `json:"content"`
+				} `json:"messages"`
+			} `json:"failures"`
+		} `json:"detailedImportResult"`
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return 0, err
+	}
+
+	// This is ugly.
+	if len(response.ImportResult.Failures) > 0 {
+		messages := make([]string, 0, 10)
+		for _, f := range response.ImportResult.Failures {
+			for _, m := range f.Messages {
+				messages = append(messages, m.Content)
+			}
+		}
+
+		return 0, errors.New(strings.Join(messages, "; "))
+	}
+
+	if resp.StatusCode != 201 {
+		return 0, fmt.Errorf("%d: %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+	}
+
+	if len(response.ImportResult.Successes) != 1 {
+		return 0, errors.New("Cannot parse response, no failures and no successes..?")
+	}
+
+	return response.ImportResult.Successes[0].InternalId, nil
 }
 
 // DeleteActivity will permanently delete an activity.
