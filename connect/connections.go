@@ -60,6 +60,35 @@ func init() {
 		Args:  cobra.ExactArgs(1),
 	}
 	connectionsCmd.AddCommand(connectionsRequestCmd)
+
+	blockedCmd := &cobra.Command{
+		Use: "blocked",
+	}
+	connectionsCmd.AddCommand(blockedCmd)
+
+	blockedListCmd := &cobra.Command{
+		Use:   "list",
+		Short: "List currently blocked users",
+		Run:   connectionsBlockedList,
+		Args:  cobra.NoArgs,
+	}
+	blockedCmd.AddCommand(blockedListCmd)
+
+	blockedAddCmd := &cobra.Command{
+		Use:   "add <display name>",
+		Short: "Add a user to the blocked list",
+		Run:   connectionsBlockedAdd,
+		Args:  cobra.ExactArgs(1),
+	}
+	blockedCmd.AddCommand(blockedAddCmd)
+
+	blockedRemoveCmd := &cobra.Command{
+		Use:   "remove <display name>",
+		Short: "Remove a user from the blocked list",
+		Run:   connectionsBlockedRemove,
+		Args:  cobra.ExactArgs(1),
+	}
+	blockedCmd.AddCommand(blockedRemoveCmd)
 }
 
 func connectionsList(_ *cobra.Command, args []string) {
@@ -121,5 +150,29 @@ func connectionsRequest(_ *cobra.Command, args []string) {
 	displayName := args[0]
 
 	err := client.RequestConnection(displayName)
+	bail(err)
+}
+
+func connectionsBlockedList(_ *cobra.Command, _ []string) {
+	blockedUsers, err := client.BlockedUsers()
+	bail(err)
+
+	t := NewTable()
+	t.AddHeader("Display Name", "Name", "Location", "Profile Image")
+	for _, c := range blockedUsers {
+		t.AddRow(c.DisplayName, c.Fullname, c.Location, c.ProfileImageURLMedium)
+	}
+	t.Output(os.Stdout)
+}
+
+func connectionsBlockedAdd(_ *cobra.Command, args []string) {
+	displayName := args[0]
+	err := client.BlockUser(displayName)
+	bail(err)
+}
+
+func connectionsBlockedRemove(_ *cobra.Command, args []string) {
+	displayName := args[0]
+	err := client.UnblockUser(displayName)
 	bail(err)
 }

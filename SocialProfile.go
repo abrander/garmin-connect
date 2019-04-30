@@ -48,3 +48,32 @@ func (c *Client) PublicSocialProfile(displayName string) (*SocialProfile, error)
 
 	return profile, err
 }
+
+// BlockedUsers returns the list of blocked users for the currently
+// authenticated user.
+func (c *Client) BlockedUsers() ([]SocialProfile, error) {
+	URL := "https://connect.garmin.com/modern/proxy/userblock-service/blockuser"
+
+	var results []SocialProfile
+
+	err := c.getJSON(URL, &results)
+	if err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
+// BlockUser will block a user.
+func (c *Client) BlockUser(displayName string) error {
+	URL := "https://connect.garmin.com/modern/proxy/userblock-service/blockuser/" + displayName
+
+	return c.write("POST", URL, nil, 200)
+}
+
+// UnblockUser removed displayName from the block list.
+func (c *Client) UnblockUser(displayName string) error {
+	URL := "https://connect.garmin.com/modern/proxy/userblock-service/blockuser/" + displayName
+
+	return c.write("DELETE", URL, nil, 204)
+}
