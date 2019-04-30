@@ -49,6 +49,9 @@ func (c *Client) Weightins(startDate time.Time, endDate time.Time) (*WeightAvera
 		formatDate(startDate),
 		formatDate(endDate))
 
+	// An alternative endpoint for weight info this can be found here:
+	// https://connect.garmin.com/modern/proxy/userprofile-service/userprofile/personal-information/weightWithOutbound?from=1556359100000&until=1556611800000
+
 	if !c.authenticated() {
 		return nil, nil, ErrNotAuthenticated
 	}
