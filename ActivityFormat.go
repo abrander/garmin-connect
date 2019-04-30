@@ -1,7 +1,6 @@
 package connect
 
 import (
-	"errors"
 	"path/filepath"
 	"strings"
 )
@@ -29,10 +28,12 @@ const (
 	activityFormatInvalid
 )
 
-var (
-	// ErrUnknownFormatwill be returned if the activity file format is unknown.
-	ErrUnknownFormat = errors.New("Unknown format")
+const (
+	// ErrUnknownFormat will be returned if the activity file format is unknown.
+	ErrUnknownFormat = Error("Unknown format")
+)
 
+var (
 	activityFormatTable = map[string]ActivityFormat{
 		"fit": ActivityFormatFIT,
 		"tcx": ActivityFormatTCX,

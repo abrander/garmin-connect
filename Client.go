@@ -16,30 +16,30 @@ import (
 	"time"
 )
 
-var (
+const (
 	// ErrForbidden will be returned if the client doesn't have access to the
 	// requested ressource.
-	ErrForbidden = errors.New("forbidden")
+	ErrForbidden = Error("forbidden")
 
 	// ErrNotFound will be returned if the requested ressource could not be
 	// found.
-	ErrNotFound = errors.New("not found")
+	ErrNotFound = Error("not found")
 
 	// ErrBadRequest will be returned if Garmin returned a status code 400.
-	ErrBadRequest = errors.New("bad request")
+	ErrBadRequest = Error("bad request")
 
 	// ErrNoCredentials will be returned if credentials are needed - but none
 	// are set.
-	ErrNoCredentials = errors.New("no credentials set")
+	ErrNoCredentials = Error("no credentials set")
 
 	// ErrNotAuthenticated will be returned is the client is not
 	// authenticated as required by the request. Remember to call
 	// Authenticate().
-	ErrNotAuthenticated = errors.New("client is not authenticated")
+	ErrNotAuthenticated = Error("client is not authenticated")
 
 	// ErrWrongCredentials will be returned if the username and/or
 	// password is not recognized by Garmin Connect.
-	ErrWrongCredentials = errors.New("username and/or password not recognized")
+	ErrWrongCredentials = Error("username and/or password not recognized")
 )
 
 const (
