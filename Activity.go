@@ -183,7 +183,7 @@ func (c *Client) ImportActivity(file io.Reader, format ActivityFormat) (int, err
 	var response struct {
 		ImportResult struct {
 			Successes []struct {
-				InternalId int `json:"internalId"`
+				InternalID int `json:"internalId"`
 			} `json:"successes"`
 
 			Failures []struct {
@@ -216,10 +216,10 @@ func (c *Client) ImportActivity(file io.Reader, format ActivityFormat) (int, err
 	}
 
 	if len(response.ImportResult.Successes) != 1 {
-		return 0, errors.New("Cannot parse response, no failures and no successes..?")
+		return 0, Error("cannot parse response, no failures and no successes..?")
 	}
 
-	return response.ImportResult.Successes[0].InternalId, nil
+	return response.ImportResult.Successes[0].InternalID, nil
 }
 
 // DeleteActivity will permanently delete an activity.

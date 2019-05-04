@@ -9,19 +9,19 @@ import (
 type ActivityFormat int
 
 const (
-	// FormatFIT is the "original" Garmin format.
+	// ActivityFormatFIT is the "original" Garmin format.
 	ActivityFormatFIT ActivityFormat = iota
 
-	// FormatTCX is Training Center XML (TCX) format.
+	// ActivityFormatTCX is Training Center XML (TCX) format.
 	ActivityFormatTCX
 
-	// FormatGPX will export as GPX - the GPS Exchange Format.
+	// ActivityFormatGPX will export as GPX - the GPS Exchange Format.
 	ActivityFormatGPX
 
-	// FormatKML will export KML files compatible with Google Earth.
+	// ActivityFormatKML will export KML files compatible with Google Earth.
 	ActivityFormatKML
 
-	// FormatCSV will export splits as CSV.
+	// ActivityFormatCSV will export splits as CSV.
 	ActivityFormatCSV
 
 	activityFormatMax
@@ -43,7 +43,7 @@ var (
 	}
 )
 
-// Extension returns an appropiate filename extension for format.
+// Extension returns an appropriate filename extension for format.
 func (f ActivityFormat) Extension() string {
 	for extension, format := range activityFormatTable {
 		if format == f {

@@ -60,6 +60,7 @@ func (c *Client) AcceptConnection(connectionRequestID int) error {
 	return c.write("PUT", URL, payload, 0)
 }
 
+// SearchConnections can search other users of Garmin Connect.
 func (c *Client) SearchConnections(keyword string) ([]SocialProfile, error) {
 	URL := "https://connect.garmin.com/modern/proxy/usersearch-service/search"
 
