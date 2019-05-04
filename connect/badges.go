@@ -126,6 +126,8 @@ func badgesView(_ *cobra.Command, args []string) {
 	t.AddValue("Points", badge.Points)
 	t.AddValue("Earned", formatDate(badge.EarnedDate.Time))
 	t.AddValueUnit("Earned", badge.EarnedNumber, "time(s)")
+	t.AddValue("Available from", formatDate(badge.Start.Time))
+	t.AddValue("Available to", formatDate(badge.End.Time))
 	t.Output(os.Stdout)
 
 	if len(badge.Connections) > 0 {
