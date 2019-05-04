@@ -89,13 +89,13 @@ func badgesEarned(_ *cobra.Command, args []string) {
 	}
 
 	t := NewTable()
-	t.AddHeader("Badge", "Points", "Date")
+	t.AddHeader("ID", "Badge", "Points", "Date")
 	for _, badge := range badges {
 		p := fmt.Sprintf("%d", badge.Points)
 		if badge.EarnedNumber > 1 {
 			p = fmt.Sprintf("%d x%d", badge.Points, badge.EarnedNumber)
 		}
-		t.AddRow(badge.Name, p, badge.EarnedDate.String())
+		t.AddRow(badge.ID, badge.Name, p, badge.EarnedDate.String())
 	}
 	t.Output(os.Stdout)
 }
