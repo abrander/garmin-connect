@@ -101,7 +101,7 @@ func (c *Client) SearchConnections(keyword string) ([]SocialProfile, error) {
 func (c *Client) RemoveConnection(connectionRequestID int) error {
 	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/userprofile-service/connection/end/%d", connectionRequestID)
 
-	return c.write("PUT", URL, nil, 0)
+	return c.write("PUT", URL, nil, 200)
 }
 
 // RequestConnection will request a connection with displayName.
