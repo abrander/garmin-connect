@@ -30,7 +30,7 @@ func init() {
 	connectionsCmd.AddCommand(connectionsPendingCmd)
 
 	connectionsRemoveCmd := &cobra.Command{
-		Use:   "remove <display name>",
+		Use:   "remove <connection ID>",
 		Short: "Remove a connection",
 		Run:   connectionsRemove,
 		Args:  cobra.ExactArgs(1),
@@ -101,9 +101,9 @@ func connectionsList(_ *cobra.Command, args []string) {
 	bail(err)
 
 	t := NewTable()
-	t.AddHeader("Display Name", "Name", "Location", "Profile Image")
+	t.AddHeader("Connection ID", "Display Name", "Name", "Location", "Profile Image")
 	for _, c := range connections {
-		t.AddRow(c.DisplayName, c.Fullname, c.Location, c.ProfileImageURLMedium)
+		t.AddRow(c.ConnectionRequestID, c.DisplayName, c.Fullname, c.Location, c.ProfileImageURLMedium)
 	}
 	t.Output(os.Stdout)
 }
@@ -121,8 +121,10 @@ func connectionsPending(_ *cobra.Command, _ []string) {
 }
 
 func connectionsRemove(_ *cobra.Command, args []string) {
-	connectionRequestID, _ := strconv.Atoi(args[0])
-	err := client.RemoveConnection(connectionRequestID)
+	connectionRequestID, err := strconv.Atoi(args[0])
+	bail(err)
+
+	err = client.RemoveConnection(connectionRequestID)
 	bail(err)
 }
 
