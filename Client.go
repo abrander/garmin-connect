@@ -313,7 +313,12 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 	return resp, err
 }
 
-func (c *Client) download(url string, w io.Writer) error {
+// Download will retrieve a file from url using Garmin Connect credentials.
+// It's mostly useful when developing new features or debugging existing
+// ones.
+// Please note that this will pass the Garmin session cookie to the URL
+// provided. Only use this for endpoints on garmin.com.
+func (c *Client) Download(url string, w io.Writer) error {
 	req, err := c.newRequest("GET", url, nil)
 	if err != nil {
 		return err

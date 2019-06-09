@@ -110,7 +110,7 @@ func (c *Client) ExportActivity(id int, w io.Writer, format ActivityFormat) erro
 	if format == ActivityFormatFIT {
 		buffer := bytes.NewBuffer(nil)
 
-		err := c.download(URL, buffer)
+		err := c.Download(URL, buffer)
 		if err != nil {
 			return err
 		}
@@ -134,7 +134,7 @@ func (c *Client) ExportActivity(id int, w io.Writer, format ActivityFormat) erro
 		return err
 	}
 
-	return c.download(URL, w)
+	return c.Download(URL, w)
 }
 
 // ImportActivity will import an activity into Garmin Connect. The activity
