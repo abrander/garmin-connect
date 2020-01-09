@@ -186,7 +186,7 @@ func weightRange(_ *cobra.Command, args []string) {
 		t2.AddRow(
 			weightin.Date,
 			weightin.Weight/1000.0,
-			weightin.BMI,
+			nzf(weightin.BMI),
 			nzf(weightin.BodyFatPercentage),
 			nzf(weightin.Weight*weightin.BodyFatPercentage/100000.0),
 			nzf(weightin.BodyWater),
