@@ -60,10 +60,13 @@ type Client struct {
 	dumpWriter       io.Writer
 }
 
+// Option is the type to set options on the client.
+type Option func(*Client)
+
 // SessionID will set a predefined session ID. This can be useful for clients
 // keeping state. A few HTTP roundtrips can be saved, if the session ID is
 // reused. And some load wouyld be taken of Garmin servers.
-func SessionID(sessionID string) func(*Client) {
+func SessionID(sessionID string) Option {
 	return func(c *Client) {
 		if sessionID != "" {
 			c.SessionID = sessionID
@@ -72,7 +75,7 @@ func SessionID(sessionID string) func(*Client) {
 }
 
 // Credentials can be used to pass login credentials to NewClient.
-func Credentials(email string, password string) func(*Client) {
+func Credentials(email string, password string) Option {
 	return func(c *Client) {
 		c.Email = email
 		c.Password = password
@@ -81,14 +84,14 @@ func Credentials(email string, password string) func(*Client) {
 
 // AutoRenewSession will set if the session should be autorenewed upon expire.
 // Default is true.
-func AutoRenewSession(autoRenew bool) func(*Client) {
+func AutoRenewSession(autoRenew bool) Option {
 	return func(c *Client) {
 		c.autoRenewSession = autoRenew
 	}
 }
 
 // DebugLogger is used to set a debug logger.
-func DebugLogger(logger Logger) func(*Client) {
+func DebugLogger(logger Logger) Option {
 	return func(c *Client) {
 		c.debugLogger = logger
 	}
@@ -96,7 +99,7 @@ func DebugLogger(logger Logger) func(*Client) {
 
 // DumpWriter will instruct Client to dump all HTTP requests and responses to
 // and from Garmin to w.
-func DumpWriter(w io.Writer) func(*Client) {
+func DumpWriter(w io.Writer) Option {
 	return func(c *Client) {
 		c.dumpWriter = w
 	}
@@ -104,7 +107,7 @@ func DumpWriter(w io.Writer) func(*Client) {
 
 // NewClient returns a new client for accessing the unofficial Garmin Connect
 // API.
-func NewClient(options ...func(*Client)) *Client {
+func NewClient(options ...Option) *Client {
 	client := &Client{
 		client: &http.Client{
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -122,7 +125,7 @@ func NewClient(options ...func(*Client)) *Client {
 }
 
 // SetOptions can be used to set various options on Client.
-func (c *Client) SetOptions(options ...func(*Client)) {
+func (c *Client) SetOptions(options ...Option) {
 	for _, option := range options {
 		option(c)
 	}
