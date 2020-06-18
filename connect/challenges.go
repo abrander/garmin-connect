@@ -154,7 +154,7 @@ func challengesView(_ *cobra.Command, args []string) {
 
 	players := make([]string, len(challenge.Players))
 	for i, player := range challenge.Players {
-		players[i] = player.FullName
+		players[i] = player.FullName + " [" + player.DisplayName + "]"
 	}
 
 	t := NewTabular()
