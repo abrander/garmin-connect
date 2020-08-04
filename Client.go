@@ -402,6 +402,12 @@ func (c *Client) Authenticate() error {
 	}
 	c.dump(resp)
 
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+
+		return fmt.Errorf("Garmin SSO returned \"%s\"", resp.Status)
+	}
+
 	body, _ := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 
