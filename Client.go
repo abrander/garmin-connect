@@ -45,6 +45,10 @@ const (
 const (
 	// sessionCookieName is the magic session cookie name.
 	sessionCookieName = "SESSIONID"
+
+	// cflbCookieName is the cookie used by Cloudflare to pin the request
+	// to a specific backend.
+	cflbCookieName = "__cflb"
 )
 
 // Client can be used to access the unofficial Garmin Connect API.
@@ -53,6 +57,11 @@ type Client struct {
 	Password  string         `json:"password"`
 	SessionID string         `json:"sessionID"`
 	Profile   *SocialProfile `json:"socialProfile"`
+
+	// LoadBalancerID is the load balancer ID set by Cloudflare in front of
+	// Garmin Connect. This must be preserves across requests. A session key
+	// is only valid with a corresponding loadbalancer key.
+	LoadBalancerID string `json:"cflb"`
 
 	client           *http.Client
 	autoRenewSession bool
@@ -170,6 +179,13 @@ func (c *Client) newRequest(method string, url string, body io.Reader) (*http.Re
 	// If sessionid is known, add the cookie.
 	if c.SessionID != "" {
 		req.AddCookie(c.cookie())
+	}
+
+	if c.LoadBalancerID != "" {
+		req.AddCookie(&http.Cookie{
+			Value: c.LoadBalancerID,
+			Name:  cflbCookieName,
+		})
 	}
 
 	return req, nil
@@ -436,6 +452,12 @@ func (c *Client) Authenticate() error {
 
 	// Look for the needed sessionid cookie.
 	for _, cookie := range resp.Cookies() {
+		if cookie.Name == cflbCookieName {
+			c.debugLogger.Printf("Found load balancer cookie with value %s", cookie.Value)
+
+			c.LoadBalancerID = cookie.Value
+		}
+
 		if cookie.Name == sessionCookieName {
 			c.debugLogger.Printf("Found session cookie with value %s", cookie.Value)
 
