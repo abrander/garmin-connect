@@ -284,6 +284,7 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 
 			// Wups. Our session got invalidated.
 			c.SessionID = ""
+			c.LoadBalancerID = ""
 
 			// Re-new session.
 			err = c.Authenticate()
@@ -566,6 +567,7 @@ func (c *Client) Signout() error {
 	defer resp.Body.Close()
 
 	c.SessionID = ""
+	c.LoadBalancerID = ""
 
 	return nil
 }
