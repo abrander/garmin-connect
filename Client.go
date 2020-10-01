@@ -297,9 +297,13 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 			// Replace the drained body
 			req.Body = save
 
-			// Replace the cookie ned newRequest with the new sessionid.
+			// Replace the cookie ned newRequest with the new sessionid and load balancer key.
 			req.Header.Del("Cookie")
 			req.AddCookie(c.cookie())
+			req.AddCookie(&http.Cookie{
+				Value: c.LoadBalancerID,
+				Name:  cflbCookieName,
+			})
 
 			c.debugLogger.Printf("Replaying %s request to %s", req.Method, req.URL.String())
 
