@@ -33,6 +33,13 @@ type GearType struct {
 	UpdateDate Time   `json:"updateData"`
 }
 
+// GearStats describes the stats of gear
+type GearStats struct {
+	TotalDistance   float64 `json:"totalDistance"`
+	TotalActivities int     `json:"totalActivities"`
+	Processsing     bool    `json:"processing"`
+}
+
 func (c *Client) Gear(profileID int64) ([]Gear, error) {
 	if profileID == 0 && c.Profile == nil {
 		return nil, ErrNotAuthenticated
@@ -51,4 +58,26 @@ func (c *Client) Gear(profileID int64) ([]Gear, error) {
 		return nil, err
 	}
 	return gear, nil
+}
+
+func (c *Client) GearType() ([]GearType, error) {
+	URL := "https://connect.garmin.com/modern/proxy/gear-service/gear/types"
+	var gearType []GearType
+	err := c.getJSON(URL, &gearType)
+	if err != nil {
+		return nil, err
+	}
+	return gearType, nil
+}
+
+func (c *Client) GearStats(uuid string) (*GearStats, error) {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/userstats-service/gears/%s",
+		uuid,
+	)
+	gearStats := new(GearStats)
+	err := c.getJSON(URL, &gearStats)
+	if err != nil {
+		return nil, err
+	}
+	return gearStats, nil
 }
