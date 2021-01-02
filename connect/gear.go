@@ -23,11 +23,27 @@ func init() {
 	gearCmd.AddCommand(gearListCmd)
 
 	gearTypeListCmd := &cobra.Command{
-		Use:   "type-list",
+		Use:   "types",
 		Short: "List Gear Types",
 		Run:   gearTypeList,
 	}
 	gearCmd.AddCommand(gearTypeListCmd)
+
+	gearLinkCommand := &cobra.Command{
+		Use:   "link <gear UUID> <activity id>",
+		Short: "Link Gear to Activity",
+		Run:   gearLink,
+		Args:  cobra.ExactArgs(2),
+	}
+	gearCmd.AddCommand(gearLinkCommand)
+
+	gearUnlinkCommand := &cobra.Command{
+		Use:   "unlink <gear UUID> <activity id>",
+		Short: "Unlink Gear to Activity",
+		Run:   gearUnlink,
+		Args:  cobra.ExactArgs(2),
+	}
+	gearCmd.AddCommand(gearUnlinkCommand)
 }
 
 func gearList(_ *cobra.Command, args []string) {
@@ -82,4 +98,22 @@ func gearTypeList(_ *cobra.Command, args []string) {
 		)
 	}
 	t.Output(os.Stdout)
+}
+
+func gearLink(_ *cobra.Command, args []string) {
+	uuid := args[0]
+	activityID, err := strconv.Atoi(args[1])
+	bail(err)
+
+	err = client.GearLink(uuid, activityID)
+	bail(err)
+}
+
+func gearUnlink(_ *cobra.Command, args []string) {
+	uuid := args[0]
+	activityID, err := strconv.Atoi(args[1])
+	bail(err)
+
+	err = client.GearUnlink(uuid, activityID)
+	bail(err)
 }

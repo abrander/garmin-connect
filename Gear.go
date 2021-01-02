@@ -81,3 +81,21 @@ func (c *Client) GearStats(uuid string) (*GearStats, error) {
 	}
 	return gearStats, nil
 }
+
+func (c *Client) GearLink(uuid string, activityID int) error {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/gear-service/gear/link/%s/activity/%d",
+		uuid,
+		activityID,
+	)
+	return c.write("PUT", URL, "", 200)
+
+}
+
+func (c *Client) GearUnlink(uuid string, activityID int) error {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/gear-service/gear/unlink/%s/activity/%d",
+		uuid,
+		activityID,
+	)
+	return c.write("PUT", URL, "", 200)
+
+}
