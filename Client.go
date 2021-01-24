@@ -74,12 +74,22 @@ type Option func(*Client)
 
 // SessionID will set a predefined session ID. This can be useful for clients
 // keeping state. A few HTTP roundtrips can be saved, if the session ID is
-// reused. And some load wouyld be taken of Garmin servers.
+// reused. And some load would be taken of Garmin servers. This must be
+// accompanied by LoadBalancerID.
+// Generally this should not be used. Users of this package should save
+// all exported fields from Client and re-use those at a later request.
+// json.Marshal() and json.Unmarshal() can be used.
 func SessionID(sessionID string) Option {
 	return func(c *Client) {
-		if sessionID != "" {
-			c.SessionID = sessionID
-		}
+		c.SessionID = sessionID
+	}
+}
+
+// LoadBalancerID will set a load balancer ID. This is used by Garmin load
+// balancers to route subsequent requests to the same backend server.
+func LoadBalancerID(loadBalancerID string) Option {
+	return func(c *Client) {
+		c.LoadBalancerID = loadBalancerID
 	}
 }
 
@@ -160,10 +170,20 @@ func (c *Client) dump(reqResp interface{}) {
 	_, _ = c.dumpWriter.Write(dump)
 }
 
-func (c *Client) cookie() *http.Cookie {
-	return &http.Cookie{
-		Value: c.SessionID,
-		Name:  sessionCookieName,
+// addCookies adds needed cookies to a http request if the values are known.
+func (c *Client) addCookies(req *http.Request) {
+	if c.SessionID != "" {
+		req.AddCookie(&http.Cookie{
+			Value: c.SessionID,
+			Name:  sessionCookieName,
+		})
+	}
+
+	if c.LoadBalancerID != "" {
+		req.AddCookie(&http.Cookie{
+			Value: c.LoadBalancerID,
+			Name:  cflbCookieName,
+		})
 	}
 }
 
@@ -176,17 +196,7 @@ func (c *Client) newRequest(method string, url string, body io.Reader) (*http.Re
 	// Play nice and give Garmin engineers a way to contact us.
 	req.Header.Set("User-Agent", "github.com/abrander/garmin-connect")
 
-	// If sessionid is known, add the cookie.
-	if c.SessionID != "" {
-		req.AddCookie(c.cookie())
-	}
-
-	if c.LoadBalancerID != "" {
-		req.AddCookie(&http.Cookie{
-			Value: c.LoadBalancerID,
-			Name:  cflbCookieName,
-		})
-	}
+	c.addCookies(req)
 
 	return req, nil
 }
@@ -283,8 +293,8 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 			c.debugLogger.Printf("Session invalid, requesting new session")
 
 			// Wups. Our session got invalidated.
-			c.SessionID = ""
-			c.LoadBalancerID = ""
+			c.SetOptions(SessionID(""))
+			c.SetOptions(LoadBalancerID(""))
 
 			// Re-new session.
 			err = c.Authenticate()
@@ -297,9 +307,9 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 			// Replace the drained body
 			req.Body = save
 
-			// Replace the cookie ned newRequest with the new sessionid.
+			// Replace the cookie ned newRequest with the new sessionid and load balancer key.
 			req.Header.Del("Cookie")
-			req.AddCookie(c.cookie())
+			c.addCookies(req)
 
 			c.debugLogger.Printf("Replaying %s request to %s", req.Method, req.URL.String())
 
@@ -463,13 +473,13 @@ func (c *Client) Authenticate() error {
 		if cookie.Name == cflbCookieName {
 			c.debugLogger.Printf("Found load balancer cookie with value %s", cookie.Value)
 
-			c.LoadBalancerID = cookie.Value
+			c.SetOptions(LoadBalancerID(cookie.Value))
 		}
 
 		if cookie.Name == sessionCookieName {
 			c.debugLogger.Printf("Found session cookie with value %s", cookie.Value)
 
-			c.SessionID = cookie.Value
+			c.SetOptions(SessionID(cookie.Value))
 		}
 	}
 
@@ -566,15 +576,14 @@ func (c *Client) Signout() error {
 		return nil
 	}
 
-	req.AddCookie(c.cookie())
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	c.SessionID = ""
-	c.LoadBalancerID = ""
+	c.SetOptions(SessionID(""))
+	c.SetOptions(LoadBalancerID(""))
 
 	return nil
 }

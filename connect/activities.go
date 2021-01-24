@@ -12,6 +12,8 @@ import (
 
 var (
 	exportFormat string
+	offset       int
+	count        int
 )
 
 func init() {
@@ -22,10 +24,12 @@ func init() {
 
 	activitiesListCmd := &cobra.Command{
 		Use:   "list [display name]",
-		Short: "List Actvities",
+		Short: "List Activities",
 		Run:   activitiesList,
 		Args:  cobra.RangeArgs(0, 1),
 	}
+	activitiesListCmd.Flags().IntVarP(&offset, "offset", "o", 0, "Paginating index where the list starts from")
+	activitiesListCmd.Flags().IntVarP(&count, "count", "c", 100, "Count of elements to return")
 	activitiesCmd.AddCommand(activitiesListCmd)
 
 	activitiesViewCmd := &cobra.Command{
@@ -80,11 +84,12 @@ func init() {
 
 func activitiesList(_ *cobra.Command, args []string) {
 	displayName := ""
+
 	if len(args) == 1 {
 		displayName = args[0]
 	}
 
-	activities, err := client.Activities(displayName, 0, 100)
+	activities, err := client.Activities(displayName, offset, count)
 	bail(err)
 
 	t := NewTable()
