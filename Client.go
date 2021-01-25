@@ -377,14 +377,11 @@ func (c *Client) authenticated() bool {
 func (c *Client) Authenticate() error {
 	// We cannot use Client.do() in this function, since this function can be
 	// called from do() upon session renewal.
-	URL := "https://sso.garmin.com/sso/signin?service=https%3A%2F%2Fconnect.garmin.com%2Fmodern%2F" +
+	URL := "https://sso.garmin.com/sso/signin" +
+		"?service=https%3A%2F%2Fconnect.garmin.com%2Fmodern%2F" +
 		"&gauthHost=https%3A%2F%2Fconnect.garmin.com%2Fmodern%2F" +
 		"&generateExtraServiceTicket=true" +
-		"&generateTwoExtraServiceTickets=true" +
-		"&useCustomHeader=false" +
-		"&mfaRequired=false" +
-		"&rememberMyBrowserShown=false" +
-		"&rememberMyBrowserChecked=false"
+		"&generateTwoExtraServiceTickets=true"
 
 	if c.Email == "" || c.Password == "" {
 		return ErrNoCredentials
