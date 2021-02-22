@@ -63,9 +63,6 @@ func gearList(_ *cobra.Command, args []string) {
 		gearStats, err := client.GearStats(g.Uuid)
 		bail(err)
 
-		//totalDistance, err := gearStats.TotalDistance.Int64()
-		//bail(err)
-
 		t.AddRow(
 			g.Uuid,
 			g.GearTypeName,
