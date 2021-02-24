@@ -1,5 +1,9 @@
 package connect
 
+import (
+	"fmt"
+)
+
 // CalendarYear describes a Garmin Connect calendar year
 type CalendarYear struct {
 	StartDayOfJanuary int           `json:"startDayofJanuary"`
@@ -59,4 +63,49 @@ type CalendarItem struct {
 	AutoCalcCalories         bool    `json:"autoCalcCalories"`
 	ProtectedWorkoutSchedule bool    `json:"protectedWorkoutSchedule"`
 	IsParent                 bool    `json:"isParent"`
+}
+
+// CalendarYear will get the activity summaries  and list of days active for a given year
+func (c *Client) CalendarYear(year int) (*CalendarYear, error) {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/calendar-service/year/%d",
+		year,
+	)
+	calendarYear := new(CalendarYear)
+	err := c.getJSON(URL, &calendarYear)
+	if err != nil {
+		return nil, err
+	}
+
+	return calendarYear, nil
+}
+
+// CalendarMonth will get the activities for a given month
+func (c *Client) CalendarMonth(year int, month int) (*CalendarMonth, error) {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/calendar-service/year/%d/month/%d",
+		year,
+		month-1, // Months in Garmin Connect start from zero
+	)
+	calendarMonth := new(CalendarMonth)
+	err := c.getJSON(URL, &calendarMonth)
+	if err != nil {
+		return nil, err
+	}
+
+	return calendarMonth, nil
+}
+
+// CalendarWeek will get the activities for a given week
+func (c *Client) CalendarWeek(year int, month int, week int) (*CalendarWeek, error) {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/calendar-service/year/%d/month/%d/day/%d",
+		year,
+		month-1, // Months in Garmin Connect start from zero
+		week,
+	)
+	calendarWeek := new(CalendarWeek)
+	err := c.getJSON(URL, &calendarWeek)
+	if err != nil {
+		return nil, err
+	}
+
+	return calendarWeek, nil
 }
