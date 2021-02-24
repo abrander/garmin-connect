@@ -56,8 +56,8 @@ type CalendarItem struct {
 	Distance                 int     `json:"distance"`
 	Calories                 int     `json:"calories"`
 	StartTimestampLocal      Time    `json:"startTimestampLocal"`
-	ElapsedDuration          int     `json:"elapsedDuration"`
-	Strokes                  int     `json:"strokes"`
+	ElapsedDuration          float64 `json:"elapsedDuration"`
+	Strokes                  float64 `json:"strokes"`
 	MaxSpeed                 float64 `json:"maxSpeed"`
 	ShareableEvent           bool    `json:"shareableEvent"`
 	AutoCalcCalories         bool    `json:"autoCalcCalories"`
@@ -94,9 +94,9 @@ func (c *Client) CalendarMonth(year int, month int) (*CalendarMonth, error) {
 	return calendarMonth, nil
 }
 
-// CalendarWeek will get the activities for a given week
+// CalendarWeek will get the activities for a given week. A week will be returned that contains the day requested, not starting with)
 func (c *Client) CalendarWeek(year int, month int, week int) (*CalendarWeek, error) {
-	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/calendar-service/year/%d/month/%d/day/%d",
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/calendar-service/year/%d/month/%d/day/%d/start/1",
 		year,
 		month-1, // Months in Garmin Connect start from zero
 		week,
