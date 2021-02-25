@@ -196,6 +196,9 @@ func (c *Client) newRequest(method string, url string, body io.Reader) (*http.Re
 	// Play nice and give Garmin engineers a way to contact us.
 	req.Header.Set("User-Agent", "github.com/abrander/garmin-connect")
 
+	// Yep. This is needed for requests sent to the API. No idea what it does.
+	req.Header.Add("nk", "NT")
+
 	c.addCookies(req)
 
 	return req, nil
@@ -236,9 +239,6 @@ func (c *Client) write(method string, url string, payload interface{}, expectedS
 	if err != nil {
 		return err
 	}
-
-	// Yep. This is needed for writing to the API. No idea what it does.
-	req.Header.Add("nk", "NT")
 
 	// If we have a payload it is by definition JSON.
 	if payload != nil {
