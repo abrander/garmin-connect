@@ -258,6 +258,27 @@ func (c *Client) write(method string, url string, payload interface{}, expectedS
 	return nil
 }
 
+// handleForbidden will try to extract an error message from the response.
+func (c *Client) handleForbidden(resp *http.Response) error {
+	defer resp.Body.Close()
+
+	type proxy struct {
+		Message string `json:"message"`
+		Error   string `json:"error"`
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+
+	var errorMessage proxy
+
+	err := decoder.Decode(&errorMessage)
+	if err == nil && errorMessage.Message != "" {
+		return Error(errorMessage.Message)
+	}
+
+	return ErrForbidden
+}
+
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	c.debugLogger.Printf("Requesting %s at %s", req.Method, req.URL.String())
 
@@ -333,8 +354,7 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 		resp.Body.Close()
 		return nil, ErrBadRequest
 	case http.StatusForbidden:
-		resp.Body.Close()
-		return nil, ErrForbidden
+		return nil, c.handleForbidden(resp)
 	case http.StatusNotFound:
 		resp.Body.Close()
 		return nil, ErrNotFound
