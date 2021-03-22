@@ -16,7 +16,7 @@ type Goal struct {
 	Created      Date     `json:"createDate"`
 }
 
-// GoalType represents different types of gaols.
+// GoalType represents different types of goals.
 type GoalType int
 
 // String implements Stringer.
