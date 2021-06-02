@@ -3,6 +3,7 @@ package connect
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -131,6 +132,14 @@ func NewClient(options ...Option) *Client {
 		client: &http.Client{
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
+			},
+
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					// To avoid a Cloudflare error, we have to use TLS 1.1 or 1.2.
+					MinVersion: tls.VersionTLS11,
+					MaxVersion: tls.VersionTLS12,
+				},
 			},
 		},
 		autoRenewSession: true,
@@ -438,12 +447,12 @@ func (c *Client) Authenticate() error {
 		"_csrf":    {csrfToken},
 	}
 
-	req, err = http.NewRequest("POST", URL, strings.NewReader(formValues.Encode()))
+	req, err = c.newRequest("POST", URL, strings.NewReader(formValues.Encode()))
 	if err != nil {
 		return nil
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Origin", "https://sso.garmin.com")
+	req.Header.Set("Referer", URL)
 
 	c.dump(req)
 
