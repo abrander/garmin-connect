@@ -170,7 +170,6 @@ func (c *Client) ImportActivity(file io.Reader, format ActivityFormat) (int, err
 		return 0, err
 	}
 
-	//req.Header.Add("nk", "NT")
 	req.Header.Add("content-type", writer.FormDataContentType())
 
 	resp, err := c.do(req)

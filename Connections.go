@@ -75,7 +75,6 @@ func (c *Client) SearchConnections(keyword string) ([]SocialProfile, error) {
 		return nil, err
 	}
 
-	req.Header.Add("nk", "NT")
 	req.Header.Add("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
 
 	resp, err := c.do(req)
