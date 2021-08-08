@@ -7,7 +7,7 @@ This is nothing but a proof of concept, and the API may change at any time.
 # How to install it
 
 ```
-go get github.com/aidun/garmin-connect/connect
+go get github.com/abrander/garmin-connect/connect
 ```
 
 # Local development
