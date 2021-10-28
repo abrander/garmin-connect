@@ -7,7 +7,7 @@ import (
 
 // ActivityHrZones describes the heart-rate zones during an activity.
 type ActivityHrZones struct {
-	SecsInZone      time.Duration `json:"secsInZone"`
+	TimeInZone      time.Duration `json:"secsInZone"`
 	ZoneLowBoundary int           `json:"zoneLowBoundary"`
 	ZoneNumber      int           `json:"zoneNumber"`
 }
@@ -18,12 +18,24 @@ func (c *Client) ActivityHrZones(activityID int) ([]ActivityHrZones, error) {
 		activityID,
 	)
 
-	var hrZones []ActivityHrZones
+	var proxy []struct {
+		TimeInZone      float64 `json:"secsInZone"`
+		ZoneLowBoundary int     `json:"zoneLowBoundary"`
+		ZoneNumber      int     `json:"zoneNumber"`
+	}
 
-	err := c.getJSON(URL, &hrZones)
+	err := c.getJSON(URL, &proxy)
 	if err != nil {
 		return nil, err
 	}
 
-	return hrZones, nil
+	zones := make([]ActivityHrZones, len(proxy))
+
+	for i, p := range proxy {
+		zones[i].TimeInZone = time.Duration(p.TimeInZone * float64(time.Second))
+		zones[i].ZoneLowBoundary = p.ZoneLowBoundary
+		zones[i].ZoneNumber = p.ZoneNumber
+	}
+
+	return zones, nil
 }

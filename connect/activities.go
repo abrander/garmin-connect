@@ -159,14 +159,11 @@ func activitiesViewHRZones(_ *cobra.Command, args []string) {
 	t := NewTabular()
 	//for (zone in zones)
 	for i := 0; i < len(zones)-1; i++ {
-		t.AddValueUnit(fmt.Sprintf("Zone %d (%3d-%3dbpm)", zones[i].ZoneNumber, zones[i].ZoneLowBoundary, zones[i+1].ZoneLowBoundary),
-			zones[i].SecsInZone,
-			"sec.",
-		)
+		t.AddValue(fmt.Sprintf("Zone %d (%3d-%3dbpm)", zones[i].ZoneNumber, zones[i].ZoneLowBoundary, zones[i+1].ZoneLowBoundary),
+			zones[i].TimeInZone)
 	}
-	t.AddValueUnit(fmt.Sprintf("Zone %d ( > %dbpm )", zones[len(zones)-1].ZoneNumber, zones[len(zones)-1].ZoneLowBoundary),
-		zones[len(zones)-1].SecsInZone,
-		"sec.")
+	t.AddValue(fmt.Sprintf("Zone %d ( > %dbpm )", zones[len(zones)-1].ZoneNumber, zones[len(zones)-1].ZoneLowBoundary),
+		zones[len(zones)-1].TimeInZone)
 
 	t.Output(os.Stdout)
 }
