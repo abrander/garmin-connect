@@ -48,6 +48,14 @@ func init() {
 	}
 	activitiesViewCmd.AddCommand(activitiesViewWeatherCmd)
 
+	activitiesViewHRZonesCmd := &cobra.Command{
+		Use:   "hrzones <activity id>",
+		Short: "View hr zones for an activity",
+		Run:   activitiesViewHRZones,
+		Args:  cobra.ExactArgs(1),
+	}
+	activitiesViewCmd.AddCommand(activitiesViewHRZonesCmd)
+
 	activitiesExportCmd := &cobra.Command{
 		Use:   "export <activity id>",
 		Short: "Export an activity to a file",
@@ -138,6 +146,25 @@ func activitiesViewWeather(_ *cobra.Command, args []string) {
 	t.AddValueUnit("Wind Speed", weather.WindSpeed, "mph")
 	t.AddValue("Latitude", weather.Latitude)
 	t.AddValue("Longitude", weather.Longitude)
+	t.Output(os.Stdout)
+}
+
+func activitiesViewHRZones(_ *cobra.Command, args []string) {
+	activityID, err := strconv.Atoi(args[0])
+	bail(err)
+
+	zones, err := client.ActivityHrZones(activityID)
+	bail(err)
+
+	t := NewTabular()
+	//for (zone in zones)
+	for i := 0; i < len(zones)-1; i++ {
+		t.AddValue(fmt.Sprintf("Zone %d (%3d-%3dbpm)", zones[i].ZoneNumber, zones[i].ZoneLowBoundary, zones[i+1].ZoneLowBoundary),
+			zones[i].TimeInZone)
+	}
+	t.AddValue(fmt.Sprintf("Zone %d ( > %dbpm )", zones[len(zones)-1].ZoneNumber, zones[len(zones)-1].ZoneLowBoundary),
+		zones[len(zones)-1].TimeInZone)
+
 	t.Output(os.Stdout)
 }
 
