@@ -548,8 +548,8 @@ func extractSocialProfile(body io.Reader) (*SocialProfile, error) {
 		if strings.Contains(line, "VIEWER_SOCIAL_PROFILE") {
 			line = strings.TrimSpace(line)
 			line = strings.Replace(line, "\\", "", -1)
-			line = strings.TrimPrefix(line, "window.VIEWER_SOCIAL_PROFILE = JSON.parse(\"")
-			line = strings.TrimSuffix(line, "\");")
+			line = strings.TrimPrefix(line, "window.VIEWER_SOCIAL_PROFILE = ")
+			line = strings.TrimSuffix(line, ";")
 
 			profile := new(SocialProfile)
 
