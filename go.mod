@@ -1,4 +1,4 @@
-module github.com/henne90gen/garmin-connect
+module github.com/abrander/garmin-connect
 
 go 1.15
 
