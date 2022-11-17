@@ -107,3 +107,25 @@ func (c *Client) GearUnlink(uuid string, activityID int) error {
 
 	return c.write("PUT", URL, "", 200)
 }
+
+// GearForActivity will retrieve the gear associated with an activity
+func (c *Client) GearForActivity(profileID int64, activityID int) ([]Gear, error) {
+	if profileID == 0 && c.Profile == nil {
+		return nil, ErrNotAuthenticated
+	}
+
+	if profileID == 0 && c.Profile != nil {
+		profileID = c.Profile.ProfileID
+	}
+
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/gear-service/gear/filterGear?userProfilePk=%d&activityId=%d",
+		profileID, activityID,
+	)
+	var gear []Gear
+	err := c.getJSON(URL, &gear)
+	if err != nil {
+		return nil, err
+	}
+
+	return gear, nil
+}
