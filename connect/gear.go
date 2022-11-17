@@ -44,6 +44,14 @@ func init() {
 		Args:  cobra.ExactArgs(2),
 	}
 	gearCmd.AddCommand(gearUnlinkCommand)
+
+	gearForActivityCommand := &cobra.Command{
+		Use:   "activity <activity id>",
+		Short: "Get Gear for Activity",
+		Run:   gearForActivity,
+		Args:  cobra.ExactArgs(1),
+	}
+	gearCmd.AddCommand(gearForActivityCommand)
 }
 
 func gearList(_ *cobra.Command, args []string) {
@@ -76,7 +84,7 @@ func gearList(_ *cobra.Command, args []string) {
 	t.Output(os.Stdout)
 }
 
-func gearTypeList(_ *cobra.Command, args []string) {
+func gearTypeList(_ *cobra.Command, _ []string) {
 	gearTypes, err := client.GearType()
 	bail(err)
 
@@ -113,4 +121,31 @@ func gearUnlink(_ *cobra.Command, args []string) {
 
 	err = client.GearUnlink(uuid, activityID)
 	bail(err)
+}
+
+func gearForActivity(_ *cobra.Command, args []string) {
+	activityID, err := strconv.Atoi(args[0])
+	bail(err)
+
+	gear, err := client.GearForActivity(0, activityID)
+	bail(err)
+
+	t := NewTable()
+	t.AddHeader("UUID", "Type", "Brand & Model", "Nickname", "Created Date", "Total Distance", "Activities")
+	for _, g := range gear {
+
+		gearStats, err := client.GearStats(g.Uuid)
+		bail(err)
+
+		t.AddRow(
+			g.Uuid,
+			g.GearTypeName,
+			g.CustomMakeModel,
+			g.DisplayName,
+			g.CreateDate.Time,
+			strconv.FormatFloat(gearStats.TotalDistance, 'f', 2, 64),
+			gearStats.TotalActivities,
+		)
+	}
+	t.Output(os.Stdout)
 }
