@@ -3,6 +3,7 @@ package connect
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 type SportType struct {
@@ -196,7 +197,7 @@ type WorkoutSchedule struct {
 }
 
 type WorkoutSchedulePayload struct {
-	Date *Time
+	Date *time.Time
 }
 
 func (s *WorkoutSchedulePayload) MarshalJSON() ([]byte, error) {
@@ -218,7 +219,7 @@ func (s *WorkoutSchedulePayload) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (c *Client) ScheduleWorkout(workoutId int, date *Time) (*WorkoutSchedule, error) {
+func (c *Client) ScheduleWorkout(workoutId int, date *time.Time) (*WorkoutSchedule, error) {
 	workoutSchedule := new(WorkoutSchedule)
 	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/workout-service/schedule/%d", workoutId)
 
