@@ -174,7 +174,10 @@ func (c *Client) CreateWorkout(workout *Workout) (*Workout, error) {
 		WorkoutName:      workout.WorkoutName,
 		WorkoutSegments:  workout.WorkoutSegments,
 		AvgTrainingSpeed: *workout.AvgTrainingSpeed,
-		Description:      *workout.Description,
+	}
+
+	if workout.Description != nil {
+		workoutRequest.Description = *workout.Description
 	}
 
 	fmt.Println(workoutRequest)
@@ -186,6 +189,16 @@ func (c *Client) CreateWorkout(workout *Workout) (*Workout, error) {
 	}
 
 	return workoutResponse, nil
+}
+
+func (c *Client) DeleteWorkout(workoutId int) error {
+	URL := fmt.Sprintf("https://connect.garmin.com/modern/proxy/workout-service/workout/%d", workoutId)
+	err := c.write("DELETE", URL, nil, 200)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type WorkoutSchedule struct {
