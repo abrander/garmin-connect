@@ -230,9 +230,7 @@ func (c *Client) getJSON(url string, target interface{}) error {
 	return decoder.Decode(target)
 }
 
-// write is suited for writing stuff to the API when you're NOT expected any
-// data in return but a HTTP status code.
-func (c *Client) write(method string, url string, payload interface{}, expectedStatus int) error {
+func (c *Client) writeWithMethodOverride(method string, url string, payload interface{}, expectedStatus int, methodOverride string) error {
 	var body io.Reader
 
 	if payload != nil {
@@ -254,11 +252,72 @@ func (c *Client) write(method string, url string, payload interface{}, expectedS
 		req.Header.Add("content-type", "application/json")
 	}
 
+	if methodOverride != "" {
+		req.Header.Add("X-HTTP-Method-Override", "PUT")
+	}
+
 	resp, err := c.do(req)
 	if err != nil {
 		return err
 	}
 	resp.Body.Close()
+
+	if expectedStatus > 0 && resp.StatusCode != expectedStatus {
+		return fmt.Errorf("HTTP %s returned %d (%d expected)", method, resp.StatusCode, expectedStatus)
+	}
+
+	return nil
+}
+
+func (c *Client) writeAndGetJSON(method string, url string, payload interface{}, expectedStatus int, target interface{}) error {
+	resp, err := c.writeWithResponse(method, url, payload, expectedStatus)
+	if err != nil {
+		return err
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+
+	return decoder.Decode(target)
+}
+
+func (c *Client) writeWithResponse(method string, url string, payload interface{}, expectedStatus int) (*http.Response, error) {
+	var body io.Reader
+
+	if payload != nil {
+		b, err := json.Marshal(payload)
+		if err != nil {
+			return nil, err
+		}
+
+		body = bytes.NewReader(b)
+	}
+
+	req, err := c.newRequest(method, url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	// If we have a payload it is by definition JSON.
+	if payload != nil {
+		req.Header.Add("content-type", "application/json")
+	}
+
+	resp, err := c.do(req)
+	if err != nil {
+		return nil, err
+	}
+	resp.Body.Close()
+
+	return resp, nil
+}
+
+// write is suited for writing stuff to the API when you're NOT expected any
+// data in return but a HTTP status code.
+func (c *Client) write(method string, url string, payload interface{}, expectedStatus int) error {
+	resp, err := c.writeWithResponse(method, url, payload, expectedStatus)
+	if err != nil {
+		return err
+	}
 
 	if expectedStatus > 0 && resp.StatusCode != expectedStatus {
 		return fmt.Errorf("HTTP %s returned %d (%d expected)", method, resp.StatusCode, expectedStatus)

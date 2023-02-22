@@ -63,6 +63,7 @@ type CalendarItem struct {
 	AutoCalcCalories         bool    `json:"autoCalcCalories"`
 	ProtectedWorkoutSchedule bool    `json:"protectedWorkoutSchedule"`
 	IsParent                 bool    `json:"isParent"`
+	WorkoutId                int     `json:"workoutId,omitempty"`
 }
 
 // CalendarYear will get the activity summaries  and list of days active for a given year
