@@ -79,7 +79,6 @@ func authenticate(_ *cobra.Command, args []string) {
 
 	fmt.Print("Password: ")
 
-	//password, err := terminal.ReadPassword(syscall.Stdin)
 	password, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 	bail(err)
 

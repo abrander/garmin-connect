@@ -1,9 +1,8 @@
-module github.com/garmin-connect
+module github.com/abrander/garmin-connect
 
 go 1.20
 
 require (
-	github.com/abrander/garmin-connect v0.0.0-20221117211130-dc0681952026
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/crypto v0.10.0
 )
