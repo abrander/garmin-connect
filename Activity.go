@@ -210,7 +210,7 @@ func (c *Client) ImportActivity(file io.Reader, format ActivityFormat) (int, err
 		return 0, errors.New(strings.Join(messages, "; "))
 	}
 
-	if resp.StatusCode != 201 {
+	if resp.StatusCode != 201 && resp.StatusCode != 202 {
 		return 0, fmt.Errorf("%d: %s", resp.StatusCode, http.StatusText(resp.StatusCode))
 	}
 
