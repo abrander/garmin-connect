@@ -1,4 +1,5 @@
-This project is unmaintained and broken. Please see https://github.com/abrander/garmin-connect/issues/26.
+> [!IMPORTANT]
+> This project is unmaintained, broken, and archived. Please see https://github.com/abrander/garmin-connect/issues/26.
 
 # garmin-connect
 
