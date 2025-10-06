@@ -1,3 +1,5 @@
+This project is unmaintained and broken. Please see #26.
+
 # garmin-connect
 
 Golang client for the Garmin Connect API.
